@@ -1,0 +1,458 @@
+SET PASSWORD FOR root@localhost=''; 
+
+-- for VS CODE connection
+CREATE USER 'sqluser'@'%' IDENTIFIED WITH mysql_native_password BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'sqluser'@'%';
+FLUSH PRIVILEGES;
+
+use library;
+
+select * from author;
+
+select b.book_title from book b
+	inner join book_author ba
+    on b.book_id = ba.book_book_id
+    inner join author a
+    on a.author_id = ba.author_author_id
+where a.author_id = 10;
+
+select a.author_first_name from author a
+	inner join book_author ba
+    on a.author_id = ba.author_author_id
+    inner join book b
+	on b.book_id = ba.book_book_id
+where b.book_id = 3;
+
+SELECT c.category_name FROM book b
+JOIN book_category bc ON b.book_id = bc.book_book_id
+JOIN category c ON bc.category_category_id = c.category_id
+WHERE b.book_id = 2;
+
+INSERT INTO borrowing (borrowing_date, borrowing_status, book_book_id, library_user_user_id)
+VALUES (CURDATE(), 'active', 12, 22);
+
+
+
+INSERT INTO reservation (reservation_date, book_book_id, library_user_user_id)VALUES (CURDATE(), 1, 11);
+INSERT INTO reservation (reservation_date, book_book_id, library_user_user_id)VALUES (CURDATE(), 1, 12);
+INSERT INTO reservation (reservation_date, book_book_id, library_user_user_id)VALUES (CURDATE(), 1, 13);
+INSERT INTO reservation (reservation_date, book_book_id, library_user_user_id)VALUES (CURDATE(), 1, 14);
+select * from reservation;
+select * from school_book Where school_school_id = 1;
+update school_book set school_book_amount = 3 Where school_school_id = 1;
+update reservation set reservation_status = "awaiting_pick_up" WHERE reservation_id = 100;
+
+
+
+
+INSERT INTO  borrowing (borrowing_date, book_book_id, library_user_user_id)VALUES (CURDATE(), 1, 14);
+
+select * from library_user WHERE school_id = 1;
+select * from borrowing where library_user_user_id = 82;
+
+SELECT COUNT(borrowing_id) FROM borrowing WHERE book_book_id = 3;
+select * from reservation;
+delete from reservation Where book_book_id = 1 AND reservation_status = 'awaiting_pick_up';
+
+select * from library_user WHERE role_id = 3;
+
+
+select * from school_book;
+
+select * from library_user;
+
+select role_id FROM library_user
+WHERE username = 'Up' AND user_password = 'Pass';
+
+
+SELECT s.school_id, s.school_name, COUNT(b.borrowing_id) AS borrowings_count
+FROM school s
+LEFT JOIN library_user u ON s.school_id = u.school_id
+LEFT JOIN borrowing b ON u.user_id = b.library_user_user_id
+WHERE b.borrowing_status ='active'
+GROUP BY s.school_id;
+
+select * from school;
+
+
+select * from library_user where role_id = 4;
+
+select * from library_user u 
+Left join borrowing b ON u.user_id = b.library_user_user_id;
+
+INSERT INTO borrowing (borrowing_date, borrowing_status, book_book_id, library_user_user_id)
+VALUES (CURDATE(), 'active', 12, 82);
+
+select * from library_user u 
+Left join borrowing bo ON u.user_id = bo.library_user_user_id
+left join book b on b.book_id = bo.book_book_id
+left join book_category bc on bc.book_book_id = b.book_id
+left join category c on c.category_id = bc.category_category_id
+where c.category_name = "Poetry"
+and u.role_id = 3; 
+
+select * from category;
+
+select a.author_id, a.author_first_name, a.author_last_name from author a
+left join book_author ba ON  ba.author_author_id = a.author_id
+left join book b on b.book_id = ba.book_book_id
+left join book_category bc on bc.book_book_id = b.book_id
+left join category c on c.category_id = bc.category_category_id
+where c.category_name = "Poetry"
+group by a.author_id
+order by a.author_id;
+
+INSERT INTO borrowing (book_book_id,library_user_user_id,borrowing_date,borrowing_status)            VALUES ("33", "7", "2022-03-07", "returned");
+INSERT INTO borrowing (book_book_id,library_user_user_id,borrowing_date)            VALUES ("33", "7", "2022-03-07");
+
+
+
+-- 3.1.3 
+SELECT u.user_id, u.user_first_name, u.user_last_name, COUNT(b.borrowing_id) AS num_books_borrowed
+FROM library_user u
+JOIN borrowing b ON u.user_id = b.library_user_user_id
+WHERE datediff(NOW(),u.user_birthdate) < 40 * 365
+AND u.role_id = 3
+GROUP BY u.user_id
+ORDER BY num_books_borrowed DESC;
+
+-- 3.1.4
+select a.author_id, a.author_first_name, a.author_last_name, b.book_id from author a
+left join book_author ba ON  ba.author_author_id = a.author_id
+left join book b on b.book_id = ba.book_book_id
+WHERE NOT EXISTS(SELECT * from borrowing WHERE book_book_id = b.book_id);
+
+-- 3.1.5
+--  VIEW `Loans_per_school_admin_year` 
+SELECT op.user_id, op.user_first_name, op.user_last_name, COUNT(b.borrowing_id) 
+AS approved_borrowings_count, YEAR(b.borrowing_date) AS borrowing_year
+FROM library_user op
+JOIN borrowing b ON op.user_id = b.operator_user_id
+WHERE op.role_id = 2
+GROUP BY op.user_id, YEAR(b.borrowing_date);
+
+SELECT op1.user_id, op1.user_first_name, op1.user_last_name, op2.user_id 
+AS user2_user_id, op2.user_first_name AS user2_first_name, op2.user_last_name AS user2_last_name, op2.borrowings_count
+FROM Loans_per_school_admin_this_year op1
+Join Loans_per_school_admin_this_year op2 ON op1.user_id < op2.user_id AND op1.borrowings_count = op2.borrowings_count
+WHERE op1.borrowings_count > 20;
+
+select * from Loans_per_school_admin_this_year View;
+
+
+-- 3.1.6
+Select c1.category_name, c2.category_name from book b
+join book_category bc1 ON bc1.book_book_id = b.book_id
+join book_category bc2 ON bc2.book_book_id = b.book_id AND bc1.category_category_id < bc2.category_category_id
+join category c1 ON bc1.category_category_id = c1.category_id
+join category c2 ON bc2.category_category_id = c2.category_id
+order by c1.category_id, c2.category_id;
+
+
+-- 3.1.6
+Select c1.category_name, c2.category_name AS category2_name, count(br.borrowing_id) AS comb_amount from book b
+join book_category bc1 ON bc1.book_book_id = b.book_id
+join book_category bc2 ON bc2.book_book_id = b.book_id AND bc1.category_category_id < bc2.category_category_id
+join category c1 ON bc1.category_category_id = c1.category_id
+join category c2 ON bc2.category_category_id = c2.category_id
+Join borrowing br ON b.book_id = br.book_book_id
+group by c1.category_id, c2.category_id
+order by comb_amount Desc;
+
+
+-- 3.1.7
+-- books_written_per_author View :
+select a1.author_id, a1.author_first_name, a1.author_last_name, count(b.book_id) AS books_written from author a1
+left join book_author ba ON  ba.author_author_id = a1.author_id
+left join book b on b.book_id = ba.book_book_id
+group by a1.author_id
+order by a1.author_id asc;
+
+
+select author_id, author_first_name, author_last_name, books_written from books_written_per_author
+where books_written <= (SELECT MAX(books_written) - 5 from books_written_per_author)
+order by books_written desc;
+
+
+
+
+
+-- 3.2.1
+SELECT b.book_id, b.book_title, sb.school_book_amount, a.author_first_name, a.author_last_name FROM book b
+left join school_book sb on b.book_id = sb.book_book_id 
+left join book_category bc on b.book_id = bc.book_book_id 
+left join category c on c.category_id = bc.category_category_id
+left join book_author ba on b.book_id = ba.book_book_id 
+left join author a on a.author_id = ba.author_author_id 
+WHERE sb.school_school_id = (SELECT school_id from library_user WHERE user_id = 2)
+AND b.book_title like "%Want%" AND ba.author_author_id = 1 
+AND bc.category_category_id = 6 AND sb.school_book_amount >= 2 
+order by book_id;
+
+
+
+SELECT book_id, book_title FROM book 
+WHERE book_title like "Understand may story governm"
+order by book_id;
+
+SELECT b.book_id, b.book_title, c.category_name FROM book b
+left join school_book sb on b.book_id = sb.book_book_id 
+left join book_category bc on b.book_id = bc.book_book_id 
+left join category c on c.category_id = bc.category_category_id
+WHERE sb.school_school_id = 2
+AND b.book_title like "%%" 
+AND c.category_name like "%s%"
+order by book_id;
+
+SELECT b.book_id, b.book_title FROM book b
+                left join school_book sb on b.book_id = sb.book_book_id
+                left join book_category bc on b.book_id = bc.book_book_id
+                WHERE sb.school_school_id = 4
+                AND b.book_title like "%Smile%"
+                AND bc.category_category_id = 1order by book_id;
+
+SELECT b.book_id, b.book_title, sb.school_book_amount FROM book b
+                left join school_book sb on b.book_id = sb.book_book_id ;
+                
+-- 3.2.2
+-- View library_user_days_due
+SELECT u.user_id, u.user_first_name, u.user_last_name, u.school_id, 
+count(b.borrowing_id) AS currently_borrowed, 
+max(datediff(curdate(), b.borrowing_date)) - 7 AS days_due 
+from library_user u
+left join borrowing b ON b.library_user_user_id = u.user_id
+Where b.borrowing_status = "active"
+group by u.user_id
+order by days_due desc;
+
+
+SELECT user_id, user_first_name, user_last_name, school_id, currently_borrowed, days_due 
+FROM library_user_days_due
+WHERE school_id = (SELECT school_id from library_user WHERE user_id = 2)
+AND user_first_name like "%bren%"  
+AND user_last_name like "%dav%"  
+AND days_due >= 1 ;
+
+SELECT u.user_id, u.user_first_name, u.user_last_name, u.school_id from library_user u
+left join borrowing b ON b.library_user_user_id = u.user_id
+Where b.borrowing_status = "active"
+group by u.user_id
+order by days_due desc;
+
+
+SELECT user_id, user_first_name, user_last_name, currently_borrowed, days_due FROM library_user_days_due
+WHERE days_due > 0;
+
+select * from reservation;
+INSERT INTO reservation (book_book_id,library_user_user_id)        VALUES ("75", "17");	
+
+
+-- 3.2.3
+SELECT r.library_user_user_id, u.user_first_name, u.user_last_name, AVG(r.review_rating) AS average_rating
+FROM review r
+left join library_user u ON u.user_id = r.library_user_user_id
+JOIN book_category bc ON bc.book_book_id = r.book_book_id
+Where school_id = (SELECT school_id from library_user WHERE user_id = 2) AND review_status = 'validated'
+AND u.user_first_name like "%Ja%"  AND u.user_last_name like "%Gl%" AND bc.category_category_id = 1  
+GROUP BY library_user_user_id;
+
+
+SELECT c.category_name, AVG(r.review_rating) AS average_rating
+FROM category c
+JOIN book_category bc ON c.category_id = bc.category_category_id
+JOIN book b ON bc.book_book_id = b.book_id
+LEFT JOIN review r ON b.book_id = r.book_book_id
+left join library_user u ON u.user_id = r.library_user_user_id
+WHERE u.school_id = (SELECT school_id from library_user WHERE user_id = 2) AND review_status = 'validated'
+AND u.user_first_name like "%Ja%"  AND u.user_last_name like "%Gl%" AND bc.category_category_id = 1  
+GROUP BY c.category_id
+order by average_rating desc;
+
+
+
+
+SELECT library_user_user_id, u.user_first_name, u.user_last_name, AVG(review_rating) AS average_rating
+FROM review
+left join library_user u ON u.user_id = library_user_user_id
+Where school_id = 1
+GROUP BY library_user_user_id;
+
+SELECT c.category_name, AVG(r.review_rating) AS average_rating
+FROM category c
+JOIN book_category bc ON c.category_id = bc.category_category_id
+JOIN book b ON bc.book_book_id = b.book_id
+LEFT JOIN review r ON b.book_id = r.book_book_id
+left join library_user u ON u.user_id = r.library_user_user_id
+WHERE u.school_id = 1
+GROUP BY c.category_id
+order by average_rating desc;
+
+
+
+
+
+-- signup
+use library;
+select * from school;
+select * from library_user;
+
+INSERT INTO library_user (username,user_password,user_first_name,user_last_name,school_id,user_birthdate,role_id)
+                VALUES ("Stavros", "Lzp", "Stavros", "Lazopoulos", "2", "2002-08-24", "5");
+                
+                
+-- activate reviews 
+SELECT r.review_id, r.book_book_id, r.review_rating, r.review_text, b.book_title, u.user_first_name, u.user_last_name
+FROM review r
+LEFT JOIN book b ON b.book_id = r.book_book_id
+LEFT JOIN library_user u ON u.user_id =  r.library_user_user_id
+WHERE u.school_id = '{school_id}'
+AND r.review_status = 'pending_validation';
+
+select * from library_user WHERE role_id =2;
+
+
+
+-- borowing
+SELECT br.borrowing_id, br.borrowing_date, br.borrowing_status, b.book_title, u.user_first_name, u.user_last_name FROM borrowing br
+LEFT JOIN book b ON b.book_id = br.book_book_id
+LEFT JOIN library_user u ON u.user_id = br.library_user_user_id
+WHERE u.school_id = 2 
+AND borrowing_status = "active"
+;
+
+
+INSERT INTO reservation (reservation_date, book_book_id, library_user_user_id)
+VALUES (CURDATE(), 1, 11);
+INSERT INTO borrowing (borrowing_status, book_book_id, library_user_user_id)
+VALUES ('active', 1, 11);
+select * from borrowing WHERE library_user_user_id = 9 order by borrowing_id desc;
+UPDATE borrowing
+SET borrowing_status = "returned"
+WHERE library_user_user_id = 11;
+
+Select * from school_book WHERE book_book_id =1;
+
+INSERT INTO borrowing (borrowing_status, book_book_id, library_user_user_id)
+VALUES ('active', 1,(SELECT user_id FROM library_user WHERE username = "film"));
+
+select * from borrowing WHERE library_user_user_id = 9 order by borrowing_id desc;
+select * from library_user WHERE user_id = 9 ;
+
+-- book author delete test
+
+select * from author;
+select * from book_author WHERE author_author_id = 20;
+DELETE from book_author WHERE book_book_id = 6;
+
+DELETE from book_author WHERE author_author_id = 21;
+
+
+USE library_backup;
+
+USE library;
+
+
+
+show full tables where Table_Type = 'BASE TABLE';
+
+select * from library_user;
+
+SELECT r.review_rating, r.review_text, u.username from review r
+LEFT JOIN library_user u ON u.user_id = r.library_user_user_id
+WHERE r.book_book_id = 2;
+
+
+
+
+SELECT op.user_id, op.user_first_name, op.user_last_name, COUNT(b.borrowing_id) AS borrowings_count, YEAR(b.borrowing_date) AS b_year from library_user op
+LEFT JOIN school s ON s.school_id = op.school_id
+LEFT JOIN library_user u ON s.school_id = u.school_id
+LEFT JOIN borrowing b ON u.user_id = b.library_user_user_id
+WHERE op.role_id = 2;
+
+select * from school_book;
+
+select * from borrowing WHERE borrowing_status = "active";
+
+select * from publisher;
+
+select * from Loans_per_school_admin_year;
+
+
+
+SELECT op.user_id, op.user_first_name, op.user_last_name, COUNT(b.borrowing_id) AS approved_borrowings_count, YEAR(b.borrowing_date) AS borrowing_year
+FROM library_user op
+JOIN borrowing b ON op.user_id = b.operator_user_id
+WHERE op.role_id = 2
+GROUP BY op.user_id, YEAR(b.borrowing_date);
+
+select l1.user_id, l1.user_first_name, l1.user_last_name,
+l2.user_id AS user2_user_id, l2.user_first_name AS user2_first_name, l2.user_last_name AS user2_last_name, 
+l1.borrowing_year , l2.approved_borrowings_count AS borrowings_count
+from Loans_per_school_admin_year l1
+join Loans_per_school_admin_year l2 ON l1.user_id < l2.user_id
+WHERE l1.borrowing_year = l2.borrowing_year
+AND l1.approved_borrowings_count = l2.approved_borrowings_count;
+
+
+-- 3.1.1
+SELECT s.school_id, s.school_name, COUNT(b.borrowing_id) AS borrowings_count
+FROM school s
+LEFT JOIN library_user u ON s.school_id = u.school_id
+LEFT JOIN borrowing b ON u.user_id = b.library_user_user_id
+WHERE u.user_id <> 0
+AND MONTH(b.borrowing_date) = 5   AND YEAR(b.borrowing_date) = 2023  GROUP BY s.school_id;
+
+-- 3.1.2
+select a.author_id, a.author_first_name, a.author_last_name from author a
+left join book_author ba ON  ba.author_author_id = a.author_id
+left join book b on b.book_id = ba.book_book_id
+left join book_category bc on bc.book_book_id = b.book_id
+left join category c on c.category_id = bc.category_category_id
+where c.category_name = "Fiction"
+group by a.author_id
+order by a.author_id;
+
+
+select u.user_id, u.user_first_name, u.user_last_name from library_user u
+Left join borrowing bo ON u.user_id = bo.library_user_user_id
+left join book b on b.book_id = bo.book_book_id
+left join book_category bc on bc.book_book_id = b.book_id
+left join category c on c.category_id = bc.category_category_id
+where c.category_name = "Fiction"
+and u.role_id = 3;
+
+-- 3.1.3
+SELECT u.user_id, u.user_first_name, u.user_last_name, COUNT(b.borrowing_id) AS num_books_borrowed
+FROM library_user u
+JOIN borrowing b ON u.user_id = b.library_user_user_id
+WHERE datediff(NOW(),u.user_birthdate) < 40 * 365
+AND u.role_id = 3
+GROUP BY u.user_id
+ORDER BY num_books_borrowed DESC;
+
+
+-- 3.3.1 
+-- my reservations
+SELECT book_id, book_title, reservation_date, reservation_status
+FROM reservation JOIN book ON book_book_id=book_id
+WHERE library_user_user_id= 15;
+
+-- search books
+SELECT book_id, book_title, author_first_name, author_last_name, category_name FROM 
+book JOIN book_author ON book_id=book_author.book_book_id
+JOIN author ON author_author_id=author_id
+JOIN book_category ON book_id=book_category.book_book_id
+JOIN category ON category_category_id=category_id
+WHERE TRUE
+AND book_title = 'Ability short science power'   AND author_first_name='Tommy'
+AND author_last_name='Walker' AND category_name = 'Art'  ORDER BY book_title;
+
+
+-- 3.3.2
+SELECT book_title, borrowing_status FROM
+borrowing JOIN book ON book_book_id=book_id 
+WHERE library_user_user_id=15
+ORDER BY borrowing_status;
+
+
