@@ -17,7 +17,7 @@ const databaseConfig = {
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'NTUAFlix_small'
+  database: 'ntuaflix'
 };
 
 const databaseConnectionString = JSON.stringify(databaseConfig);
