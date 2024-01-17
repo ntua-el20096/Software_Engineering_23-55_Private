@@ -6,7 +6,7 @@ SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='ONLY_FULL_GROUP_BY,STRICT_TRANS_TABLES,N
 
 DROP SCHEMA IF EXISTS `ntuaflix` ;
 
-CREATE SCHEMA IF NOT EXISTS `ntuaflix` DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci;
+CREATE SCHEMA IF NOT EXISTS `ntuaflix` DEFAULT CHARACTER SET latin1;
 USE `ntuaflix` ;
 
 -- ----------------------------------
@@ -16,58 +16,105 @@ USE `ntuaflix` ;
 
 -- Principal
 CREATE TABLE IF NOT EXISTS `principal` (
-  `principal_id` VARCHAR(45) NOT NULL,
-  `principal_name` VARCHAR(60) NOT NULL,
-  PRIMARY KEY (`principal_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
-
--- Movie Principle
-CREATE TABLE IF NOT EXISTS `movie_principal` (
-	`title_title_id` VARCHAR(60) NOT NULL,
-	`principal_principal_id` VARCHAR(45),
-	PRIMARY KEY (`title_title_id`,`principal_principal_id`),
-    CONSTRAINT `mp_principal_principal`
-		FOREIGN KEY (`principal_principal_id`) REFERENCES `principal`(`principal_id`)
-        ON DELETE NO ACTION
-		ON UPDATE NO ACTION,
-	CONSTRAINT `mp_title_title1`
-		FOREIGN KEY (`title_title_id`) REFERENCES `title`(`title_id`)
-        ON DELETE NO ACTION
-        ON UPDATE NO ACTION
-)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
+  `principal_id` VARCHAR(255) NOT NULL,
+  `principal_name` VARCHAR(255) NOT NULL,
+  `principal_birthYr` INT NULL,
+  `principal_deathYr` INT NULL,
+  `principal_profession` VARCHAR(255) NOT NULL,
+  `titles_titles_id` VARCHAR(255) NULL,
+  `principal_imageURL` VARCHAR(255) NULL,
+  PRIMARY KEY (`principal_id`));
+  
 
 -- Title
-CREATE TABLE IF NOT EXISTS `title` (
-  `title_id` VARCHAR(60) NOT NULL,
-  `title_type` VARCHAR(60) NOT NULL,
-  `title_originalTitle` VARCHAR(60) NOT NULL,
-  `title_poster` VARCHAR(45) NOT NULL,
-  `title_startYear` VARCHAR(45) NOT NULL,
-  `title_endYear` VARCHAR(45),
-  `genre_genre_id` VARCHAR(45) NOT NULL,
-  `AKAs_title_AKAs` VARCHAR(45) NOT NULL,
-  `principal_principal_id` VARCHAR(45) NOT NULL,
-  `title_rateing` VARCHAR(60) NOT NULL,
-  PRIMARY KEY (`title_id`),
-  CONSTRAINT `fk_title_principal1`
-    FOREIGN KEY (`principal_principal_id`) REFERENCES `principal` (`principal_id`)
+CREATE TABLE IF NOT EXISTS `title_basics` (
+  `title_id` VARCHAR(255) NOT NULL,
+  `title_type` VARCHAR(255) NOT NULL,
+  `title_primaryTitle` VARCHAR(255) NOT NULL,
+  `title_originalTitle` VARCHAR(255) NOT NULL,
+  `title_isAdult` INT NOT NULL,
+  `title_startYear` INT NOT NULL,
+  `title_endYear` INT NULL,
+  `title_runtimeMinutes` INT NULL,
+  `title_genre` VARCHAR(255) NULL,
+  `title_posterURL` VARCHAR(255) NULL,
+  PRIMARY KEY (`title_id`));
+
+CREATE TABLE IF NOT EXISTS `title_AKAs` (
+	`title_title_id` VARCHAR(255) NOT NULL,
+    `AKA_ordering` INT NOT NULL,
+    `AKA_title` VARCHAR(255) NOT NULL,
+    `AKA_region` VARCHAR(4) NULL,
+    `AKA_language` VARCHAR(4) NULL,
+    `AKA_types` VARCHAR(255) NULL,
+    `AKA_attributes` VARCHAR(255) NULL,
+    `AKA_isOriginal` INT NOT NULL,
+    PRIMARY KEY (`title_title_id`),
+    CONSTRAINT `fk_AKA_title_id`
+    FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)
+    ON DELETE NO ACTION
+    ON UPDATE NO ACTION);
+    
+CREATE TABLE IF NOT EXISTS `title_principals` (
+	`title_title_id` VARCHAR(255) NOT NULL,
+    `principal_ordering` INT NOT NULL,
+    `principal_principal_id` VARCHAR(255) NOT NULL,
+    `principal_category` VARCHAR(255) NOT NULL,
+    `principal_job` VARCHAR(255) NULL,
+    `principal_character` VARCHAR(255) NULL,
+    `principal_poster` VARCHAR(255) NULL ,
+    PRIMARY KEY (`title_title_id`, `principal_principal_id`),
+    CONSTRAINT `fk_principal_title_id`
+    FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)
     ON DELETE NO ACTION
     ON UPDATE NO ACTION,
-  CONSTRAINT `fk_title_AKAs`
-    FOREIGN KEY (`AKAs_title_AKAs`) REFERENCES `AKAs` (`AKA_id`)
+    CONSTRAINT `fk_principal_id`
+    FOREIGN KEY (`principal_principal_id`) REFERENCES `principal` (`principal_id`)
     ON DELETE NO ACTION
-    ON UPDATE NO ACTION)
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb3;
+    ON UPDATE NO ACTION);
+    
+CREATE TABLE IF NOT EXISTS `title_ratings` (
+	`title_title_id` VARCHAR(255) NOT NULL,
+	`rating_avg` FLOAT NOT NULL,
+	`rating_numVotes` INT NOT NULL,
+	PRIMARY KEY (`title_title_id`),
+	CONSTRAINT `fk_rating_title_id`
+	FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION);
 
--- Genre
-CREATE TABLE IF NOT EXISTS `genre` (
-  `genre_id` VARCHAR(45) NOT NULL,
-  `genre_name` VARCHAR(45) NOT NULL,
-  PRIMARY KEY (`genre_id`))
-ENGINE = InnoDB
-DEFAULT CHARACTER SET = utf8mb4
+CREATE TABLE IF NOT EXISTS `title_crew` (
+	`title_title_id` VARCHAR(255) NOT NULL,
+    `principal_directors_id` VARCHAR(255) NULL,
+    `principal_writers_id` VARCHAR(255) NOT NULL,
+    PRIMARY KEY (`title_title_id`),
+    CONSTRAINT `fk_crew_title_id`
+	FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION,
+    CONSTRAINT `fk_crew_directors_id`
+	FOREIGN KEY (`principal_directors_id`) REFERENCES `principal` (`principal_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION,
+    CONSTRAINT `fk_crew_writers_id`
+	FOREIGN KEY (`principal_writers_id`) REFERENCES `principal` (`principal_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION
+);
 
+CREATE TABLE IF NOT EXISTS `title_episode` (
+	`title_episode_id` VARCHAR(255) NOT NULL,
+	`title_series_id` VARCHAR(255) NOT NULL,
+    `title_season_NO` INT NULL,
+    `title_episode_NO` VARCHAR(4) NULL,
+    PRIMARY KEY (`title_episode_id`),
+    CONSTRAINT `fk_episode_title_id`
+	FOREIGN KEY (`title_episode_id`) REFERENCES `title_basics` (`title_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION,
+    CONSTRAINT `fk_series_title_id`
+	FOREIGN KEY (`title_series_id`) REFERENCES `title_basics` (`title_id`)
+	ON DELETE NO ACTION
+	ON UPDATE NO ACTION);
+    
+    
