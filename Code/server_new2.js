@@ -1,8 +1,8 @@
 //what does this code do? Connecting to the server which listens 
 //on the "http://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
-//title_basics and title_ratings work perfectly
-//the rest don't work because of the foreign keys
+//3,5,6 endpoints don't work because of the foreign keys? or not idk
+//3. title_akas, 5. title_crew, 6. title_episode
 
 const mysql = require('mysql2');
 const express = require('express');
@@ -142,10 +142,77 @@ app.post('/admin/upload/titleakas', upload.single('truncated_title.akas'), (req,
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  console.log(rows);
+  // console.log(rows);
   // Insert data into the 'titleakas' table
-  connection.query('INSERT INTO title_akas (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {    
+  connection.query('INSERT INTO title_AKAs (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {    
   // connection.query('INSERT INTO title_akas (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ?', [rows], (error, results) => {    
+    if (error) {
+      const response = {
+        status: 'failed',
+        message: 'Database insertion failed',
+        error: error.message
+      };
+      res.json(response);
+    } else {
+      const response = {
+        status: 'success',
+        message: 'Data uploaded and inserted into the database successfully'
+      };
+      res.json(response);
+    }
+
+
+    // Close the database connection after the insertion
+    connection.end();
+  });
+});
+
+// Define an endpoint handler for /admin/upload/namebasics
+app.post('/admin/upload/namebasics', upload.single('truncated_name.basics'), (req, res) => {
+  const fileData = req.file; // Assuming the uploaded file is in req.file
+
+  if (!fileData) {
+    const response = {
+      status: 'failed',
+      message: 'No file uploaded'
+    };
+    return res.json(response);
+  } //checks that it has a file in the body
+
+
+  const filePath = fileData.path; 
+
+  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
+  const rawData = fileData.buffer.toString('utf-8');
+  const rows = rawData.split('\n').map(row => row.split('\t'));
+
+  // console.log(rows);
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  // console.log(rows);
+  // Insert data into the 'principal' table
+  connection.query(`
+  INSERT INTO principal (
+    principal_id,
+    principal_name,
+    principal_birthYr,
+    principal_deathYr,
+    principal_profession,
+    titles_titles_id,
+    principal_imageURL
+  ) 
+  VALUES ? 
+  ON DUPLICATE KEY UPDATE 
+    principal_id = VALUES(principal_id),
+    principal_name = VALUES(principal_name),
+    principal_birthYr = VALUES(principal_birthYr),
+    principal_deathYr = VALUES(principal_deathYr),
+    principal_profession = VALUES(principal_profession),
+    titles_titles_id = VALUES(titles_titles_id),
+    principal_imageURL = VALUES(principal_imageURL)
+`, [rows], (error, results) => {
     if (error) {
       const response = {
         status: 'failed',
