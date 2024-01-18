@@ -430,13 +430,14 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
 app.post('/admin/resetall', async (req, res) => {
   try {
     // Reset data in each table
-    // await resetTable('principal');
+    
+    // await resetTable('title_episode');
+    // await resetTable('title_crew');
     // await resetTable('title_akas');
+    await resetTable('title_principals');
+    await resetTable('principal');
     await resetTable('title_ratings');
     await resetTable('title_basics');
-    // await resetTable('title_crew');
-    // await resetTable('title_episode');
-    // await resetTable('title_principals');
     
 
     // For demonstration purposes, let's assume resetting is successful
