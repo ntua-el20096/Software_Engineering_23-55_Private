@@ -1,6 +1,6 @@
 //what does this code do? Connecting to the server which listens 
 //on the "http://localhost:8765/" and it connects to the database and 
-//executes the endpoints 2-8, populating the db, but not all of them work though
+//executes the endpoints 1-8, populating the db, but not all of them work though
 
 const mysql = require('mysql2');
 const express = require('express');
@@ -29,6 +29,33 @@ app.use(express.json());
 const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
 
+
+// Define an endpoint handler for /admin/healthcheck
+app.get('/admin/healthcheck', (req, res) => {
+  // Simulate the database connectivity check
+  const connection = mysql.createConnection(databaseConfig);
+
+  connection.connect((error) => {
+    if (error) {
+      // Build the response JSON object for failure
+      const response = {
+        status: 'failed',
+        dataconnection: [databaseConnectionString]
+      };
+      res.json(response);
+    } else {
+      // Build the response JSON object for success
+      const response = {
+        status: 'OK',
+        dataconnection: [databaseConnectionString]
+      };
+      res.json(response);
+
+      // Close the database connection after the check
+      connection.end();
+    }
+  });
+});
 
 // Define an endpoint handler for /admin/upload/titlebasics
 app.post('/admin/upload/titlebasics', upload.single('truncated_title.basics'), (req, res) => {
