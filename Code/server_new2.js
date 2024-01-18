@@ -1,6 +1,8 @@
 //what does this code do? Connecting to the server which listens 
 //on the "http://localhost:8765/" and it connects to the database and 
-//executes the endpoints 1-8, populating the db, but not all of them work though
+//executes the endpoints 1-9, populating the db
+//title_basics and title_ratings work perfectly
+//the rest don't work because of the foreign keys
 
 const mysql = require('mysql2');
 const express = require('express');
@@ -29,6 +31,14 @@ app.use(express.json());
 const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
 
+// Create a MySQL pool
+const pool = mysql.createPool(databaseConfig);
+
+// Function to reset data in each table
+async function resetTable(tableName) {
+  const query = `DELETE FROM ${tableName}`;
+  await pool.promise().query(query);
+}
 
 // Define an endpoint handler for /admin/healthcheck
 app.get('/admin/healthcheck', (req, res) => {
@@ -349,30 +359,35 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
   });
 });
 
-// // Define an endpoint handler for /admin/resetall
-// app.post('/admin/resetall', (req, res) => {
-//   // Perform the logic to reset all data in ntuaflix's NW
-//   // You can implement the necessary operations to reset data
+// Define an endpoint handler for /admin/resetall
+app.post('/admin/resetall', async (req, res) => {
+  try {
+    // Reset data in each table
+    // await resetTable('principal');
+    // await resetTable('title_akas');
+    await resetTable('title_ratings');
+    await resetTable('title_basics');
+    // await resetTable('title_crew');
+    // await resetTable('title_episode');
+    // await resetTable('title_principals');
+    
 
-//   try {
-//     // Your reset logic goes here
+    // For demonstration purposes, let's assume resetting is successful
+    const response = {
+      status: 'OK',
+    };
 
-//     // For demonstration purposes, let's assume resetting is successful
-//     const response = {
-//       status: 'OK',
-//     };
+    res.json(response);
+  } catch (error) {
+    // If an error occurs during the reset operation
+    const response = {
+      status: 'failed',
+      reason: error.message, // Provide the specific reason for failure
+    };
 
-//     res.json(response);
-//   } catch (error) {
-//     // If an error occurs during the reset operation
-//     const response = {
-//       status: 'failed',
-//       reason: error.message, // Provide the specific reason for failure
-//     };
-
-//     res.status(500).json(response);
-//   }
-// });
+    res.status(500).json(response);
+  }
+});
 
 app.listen(port, () => {
   console.log(`Server running on port ${port}`);
