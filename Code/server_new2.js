@@ -431,9 +431,9 @@ app.post('/admin/resetall', async (req, res) => {
   try {
     // Reset data in each table
     
-    // await resetTable('title_episode');
-    // await resetTable('title_crew');
-    // await resetTable('title_akas');
+    await resetTable('title_episode');
+    await resetTable('title_crew');
+    await resetTable('title_akas');
     await resetTable('title_principals');
     await resetTable('principal');
     await resetTable('title_ratings');
