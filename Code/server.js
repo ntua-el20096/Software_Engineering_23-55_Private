@@ -433,6 +433,111 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
   });
 });
 
+
+// Define an endpoint handler for /title/:titleID
+app.get('/title/:titleID', async (req, res) => {
+  const titleID = req.params.titleID;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to fetch data for the titleObject
+      const titleQuery = `
+          SELECT 
+              tb.title_id AS titleID, 
+              tb.title_type AS type, 
+              tb.title_originalTitle AS originalTitle, 
+              tb.title_posterURL AS titlePoster, 
+              tb.title_startYear AS startYear, 
+              tb.title_endYear AS endYear, 
+              tb.title_genre AS genres,
+              tr.rating_avg AS avRating,
+              tr.rating_numVotes AS nVotes
+          FROM title_basics tb
+          LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+          WHERE tb.title_id = ?`;
+
+      // Execute the query
+      const [titleResult] = await connection.promise().query(titleQuery, [titleID]);
+
+      if (!titleResult.length) {
+          return res.status(404).json({ message: 'Title not found' });
+      }
+
+      const titleObject = titleResult[0];
+
+      // Fetch genres
+      // Assuming the genres are stored in a comma-separated string
+      titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+
+      // Fetch titleAkas
+      const akasQuery = `SELECT aka_title AS akaTitle, AKA_region AS regionAbbrev FROM title_AKAs WHERE title_title_id = ?`;
+      const [akasResult] = await connection.promise().query(akasQuery, [titleID]);
+      titleObject.titleAkas = akasResult;
+
+      // Fetch principals
+      const principalsQuery = `
+          SELECT 
+              np.principal_id AS nameID, 
+              np.principal_name AS name, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          JOIN principal np ON tp.principal_principal_id = np.principal_id
+          WHERE tp.title_title_id = ?`;
+      const [principalsResult] = await connection.promise().query(principalsQuery, [titleID]);
+      titleObject.principals = principalsResult;
+
+      // Return the titleObject
+      res.json({ titleObject });
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
+
+
+
+// Define an endpoint handler for /searchtitle
+app.get('/searchtitle', (req, res) => {
+  const titlePart = req.body.titlePart; // Extract titlePart from request body
+
+  if (!titlePart) {
+    return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+  }
+
+  const query = `SELECT * FROM title_basics WHERE title_originalTitle LIKE ?`;
+  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  connection.query(query, [likeTitlePart], (error, results) => {
+    if (error) {
+      const response = {
+        status: 'failed',
+        message: 'Database query failed',
+        error: error.message
+      };
+      res.json(response);
+    } else {
+      const response = {
+        status: 'success',
+        data: results // Send the found titles back
+      };
+      res.json(response);
+    }
+
+    // Close the database connection after the query
+    connection.end();
+  });
+});
+
+
+
 // Define an endpoint handler for /admin/resetall
 app.post('/admin/resetall', async (req, res) => {
   try {
