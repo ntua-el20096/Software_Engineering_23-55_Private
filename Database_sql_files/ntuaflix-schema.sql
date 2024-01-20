@@ -86,7 +86,7 @@ CREATE TABLE IF NOT EXISTS `title_ratings` (
 CREATE TABLE IF NOT EXISTS `title_crew` (
 	`title_title_id` VARCHAR(255) NOT NULL,
     `principal_directors_id` VARCHAR(255) NULL,
-    `principal_writers_id` VARCHAR(255) NOT NULL,
+    `principal_writers_id` VARCHAR(255) NULL,
     PRIMARY KEY (`title_title_id`),
     CONSTRAINT `fk_crew_title_id`
 	FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)

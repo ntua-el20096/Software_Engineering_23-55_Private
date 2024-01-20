@@ -1,0 +1,1 @@
+# All endpoints should be seperate here for better readability
