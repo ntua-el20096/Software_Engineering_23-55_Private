@@ -19,6 +19,7 @@ const httpsOptions = {
 const app = express();
 
 const port = 8765;
+const baseURL = '/energy/api';
 
 // Simulated database connection string
 const databaseConfig = {
@@ -48,7 +49,7 @@ async function resetTable(tableName) {
 }
 
 // Define an endpoint handler for /admin/healthcheck
-app.get('/admin/healthcheck', (req, res) => {
+app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
   // Simulate the database connectivity check
   const connection = mysql.createConnection(databaseConfig);
 
@@ -75,7 +76,7 @@ app.get('/admin/healthcheck', (req, res) => {
 });
 
 // Define an endpoint handler for /admin/upload/titlebasics
-app.post('/admin/upload/titlebasics', upload.single('truncated_title.basics'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.basics'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -126,7 +127,7 @@ app.post('/admin/upload/titlebasics', upload.single('truncated_title.basics'), (
 
 
 // Define an endpoint handler for /admin/upload/titleakas
-app.post('/admin/upload/titleakas', upload.single('truncated_title.akas'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.akas'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -175,7 +176,7 @@ app.post('/admin/upload/titleakas', upload.single('truncated_title.akas'), (req,
 });
 
 // Define an endpoint handler for /admin/upload/namebasics
-app.post('/admin/upload/namebasics', upload.single('truncated_name.basics'), (req, res) => {
+app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.basics'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -242,7 +243,7 @@ app.post('/admin/upload/namebasics', upload.single('truncated_name.basics'), (re
 });
 
 // Define an endpoint handler for /admin/upload/titlecrew
-app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.crew'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -290,7 +291,7 @@ app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req,
 });
 
 // Define an endpoint handler for /admin/upload/titleepisode
-app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.episode'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -338,7 +339,7 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
 });
 
 // Define an endpoint handler for /admin/upload/titleprincipals
-app.post('/admin/upload/titleprincipals', upload.single('truncated_title.principals'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_title.principals'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -386,7 +387,7 @@ app.post('/admin/upload/titleprincipals', upload.single('truncated_title.princip
 });
 
 // Define an endpoint handler for /admin/upload/titleratings
-app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.ratings'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -435,7 +436,7 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
 
 
 // Define an endpoint handler for /title/:titleID
-app.get('/title/:titleID', async (req, res) => {
+app.get(`${baseURL}/title/:titleID`, async (req, res) => {
   const titleID = req.params.titleID;
 
   // Establish a connection to the database
@@ -502,7 +503,7 @@ app.get('/title/:titleID', async (req, res) => {
 
 
 // Define an endpoint handler for /searchtitle
-app.get('/searchtitle', (req, res) => {
+app.get(`${baseURL}/searchtitle`, (req, res) => {
   const titlePart = req.body.titlePart; // Extract titlePart from request body
 
   if (!titlePart) {
@@ -536,7 +537,7 @@ app.get('/searchtitle', (req, res) => {
   });
 });
 
-app.get('/bygenre', async (req, res) => {
+app.get(`${baseURL}/bygenre`, async (req, res) => {
   const { qgenre, minrating, yrFrom, yrTo } = req.query;
 
   // Start building the query
@@ -592,7 +593,7 @@ app.get('/bygenre', async (req, res) => {
 });
 
 // Define an endpoint handler for /name/:nameID
-app.get('/name/:nameID', async (req, res) => {
+app.get(`${baseURL}/name/:nameID`, async (req, res) => {
   const nameID = req.params.nameID;
 
   // Establish a connection to the database
@@ -642,7 +643,7 @@ app.get('/name/:nameID', async (req, res) => {
 });
 
 // Define an endpoint handler for /searchname
-app.get('/searchname', async (req, res) => {
+app.get(`${baseURL}/searchname`, async (req, res) => {
   const namePart = req.query.namePart;
 
   // Establish a connection to the database
@@ -690,7 +691,7 @@ app.get('/searchname', async (req, res) => {
 
 
 // Define an endpoint handler for /admin/resetall
-app.post('/admin/resetall', async (req, res) => {
+app.post(`${baseURL}/admin/resetall`, async (req, res) => {
   try {
     // Reset data in each table
     
