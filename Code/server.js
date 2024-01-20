@@ -536,6 +536,157 @@ app.get('/searchtitle', (req, res) => {
   });
 });
 
+app.get('/bygenre', async (req, res) => {
+  const { qgenre, minrating, yrFrom, yrTo } = req.query;
+
+  // Start building the query
+  let query = `
+      SELECT 
+          tb.title_id AS titleID, 
+          tb.title_type AS type, 
+          tb.title_originalTitle AS originalTitle, 
+          tb.title_posterURL AS titlePoster, 
+          tb.title_startYear AS startYear, 
+          tb.title_endYear AS endYear, 
+          tb.title_genre AS genres,
+          tr.rating_avg AS avRating
+      FROM title_basics tb
+      LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+      WHERE tb.title_genre LIKE ? AND tr.rating_avg >= ?
+  `;
+
+  const queryParams = [`%${qgenre}%`, minrating];
+
+  // Add year range conditions if provided
+  if (yrFrom) {
+      query += ` AND tb.title_startYear >= ?`;
+      queryParams.push(yrFrom);
+  }
+  if (yrTo) {
+      query += ` AND tb.title_startYear <= ?`;
+      queryParams.push(yrTo);
+  }
+
+  try {
+      // Establish a connection to the database
+      const connection = mysql.createConnection(databaseConfig);
+
+      // Execute the query
+      const [results] = await connection.promise().query(query, queryParams);
+
+      // Format the results
+      const formattedResults = results.map(result => {
+          result.genres = result.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+          return result;
+      });
+
+      // Return the results
+      res.json(formattedResults);
+
+      // Close the database connection
+      connection.end();
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+// Define an endpoint handler for /name/:nameID
+app.get('/name/:nameID', async (req, res) => {
+  const nameID = req.params.nameID;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to fetch data for the nameObject
+      const nameQuery = `
+          SELECT 
+              np.principal_id AS nameID, 
+              np.principal_name AS name, 
+              np.principal_imageURL AS namePoster, 
+              np.principal_birthYr AS birthYr, 
+              np.principal_deathYr AS deathYr, 
+              np.principal_profession AS profession
+          FROM principal np
+          WHERE np.principal_id = ?`;
+
+      // Execute the query for name details
+      const [nameResult] = await connection.promise().query(nameQuery, [nameID]);
+
+      if (!nameResult.length) {
+          return res.status(404).json({ message: 'Name not found' });
+      }
+
+      const nameObject = nameResult[0];
+
+      // Fetch nameTitles
+      const titlesQuery = `
+          SELECT 
+              tp.title_title_id AS titleID, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          WHERE tp.principal_principal_id = ?`;
+      const [titlesResult] = await connection.promise().query(titlesQuery, [nameID]);
+      nameObject.nameTitles = titlesResult;
+
+      // Return the nameObject
+      res.json({ nameObject });
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
+
+// Define an endpoint handler for /searchname
+app.get('/searchname', async (req, res) => {
+  const namePart = req.query.namePart;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to search for names that contain the namePart
+      const query = `
+          SELECT 
+              principal_id AS nameID, 
+              principal_name AS name, 
+              principal_imageURL AS namePoster, 
+              principal_birthYr AS birthYr, 
+              principal_deathYr AS deathYr, 
+              principal_profession AS profession
+          FROM principal
+          WHERE principal_name LIKE ?`;
+
+      // Execute the query
+      const [results] = await connection.promise().query(query, [`%${namePart}%`]);
+
+      // Format the results as a list of nameObjects
+      const nameObjects = results.map(result => {
+          return {
+              nameID: result.nameID,
+              name: result.name,
+              namePoster: result.namePoster,
+              birthYr: result.birthYr,
+              deathYr: result.deathYr,
+              profession: result.profession,
+              // Add any additional fields here as needed
+          };
+      });
+
+      // Return the results
+      res.json(nameObjects);
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
 
 
 // Define an endpoint handler for /admin/resetall
