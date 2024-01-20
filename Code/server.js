@@ -6,8 +6,15 @@
 
 const mysql = require('mysql2');
 const express = require('express');
+const https = require('https');
 const multer = require('multer');
 const fs = require('fs');
+
+const httpsOptions = {
+  key: fs.readFileSync('server.key', 'utf8'),
+  cert: fs.readFileSync('server.crt', 'utf8'),
+  passphrase: '2372002'
+};
 
 const app = express();
 
@@ -457,6 +464,17 @@ app.post('/admin/resetall', async (req, res) => {
   }
 });
 
-app.listen(port, () => {
+const httpsServer = https.createServer({
+  key: httpsOptions.key,
+  cert: httpsOptions.cert,
+  passphrase: httpsOptions.passphrase 
+}, app);
+
+httpsServer.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
+
+//app.listen(port, () => {
+//  console.log(`Server running on port ${port}`);
+//});
