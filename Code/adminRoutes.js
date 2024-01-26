@@ -7,7 +7,7 @@ const pool = require('./database'); // Import the database connection pool
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
 
-const port = 8765;
+// const port = 8765;
 const baseURL = '/energy/api';
 
 const app = express();
