@@ -41,6 +41,7 @@ CREATE TABLE IF NOT EXISTS `title_basics` (
   PRIMARY KEY (`title_id`));
 
 CREATE TABLE IF NOT EXISTS `title_AKAs` (
+	`AKA_index` INT NOT NULL AUTO_INCREMENT,
 	`title_title_id` VARCHAR(255) NOT NULL,
     `AKA_ordering` INT NOT NULL,
     `AKA_title` VARCHAR(255) NOT NULL,
@@ -49,7 +50,7 @@ CREATE TABLE IF NOT EXISTS `title_AKAs` (
     `AKA_types` VARCHAR(255) NULL,
     `AKA_attributes` VARCHAR(255) NULL,
     `AKA_isOriginal` INT NOT NULL,
-    PRIMARY KEY (`title_title_id`),
+    PRIMARY KEY (`AKA_index`),
     CONSTRAINT `fk_AKA_title_id`
     FOREIGN KEY (`title_title_id`) REFERENCES `title_basics` (`title_id`)
     ON DELETE NO ACTION
