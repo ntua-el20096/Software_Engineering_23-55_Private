@@ -1,9 +1,24 @@
 const express = require('express');
+const https = require('https');
+const fs = require('fs');
 const multer = require('multer');
 const pool = require('./database'); // Import the database connection pool
 
 const router = express.Router();
 const upload = multer({ storage: multer.memoryStorage() });
+
+const port = 8765;
+const baseURL = '/energy/api';
+
+const app = express();
+
+
+
+const httpsOptions = {
+  key: fs.readFileSync('server.key', 'utf8'),
+  cert: fs.readFileSync('server.crt', 'utf8'),
+  passphrase: '2372002'
+};
 
 // Function to reset data in each table
 async function resetTable(tableName) {
