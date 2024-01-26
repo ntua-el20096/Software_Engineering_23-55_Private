@@ -1,6 +1,6 @@
 # CLI
 
-Διαχειριστικά endpoints work in this CLI. It is run with these commands:
+Διαχειριστικά endpoints work in this CLI. It is run with these commands (change the path for your own):
 1. node cli.js resetall --format json
 2. node cli.js healthcheck --format json
 3. node cli.js newtitles --filename "C:/Users/Αφροδίτη/tl/NtuaFlix/truncated data/truncated_title.basics.tsv" --format json
