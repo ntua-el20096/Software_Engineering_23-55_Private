@@ -1,6 +1,6 @@
 process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
 
-
+let converter = require('json-2-csv');
 const axios = require('axios');
 const yargs = require('yargs');
 const fs = require('fs');
@@ -8,6 +8,25 @@ const FormData = require('form-data');
 
 
 const baseURL = 'https://localhost:8765/energy/api';
+
+const csvmaker = function (data) {
+
+  // Array to store the values
+  csvRows = [];
+
+  // Keys:
+  const headers = Object.keys(data);
+  // Keys to csv format:
+  csvRows.push(headers.join(','));
+
+  // Values with comma seperation:
+  const values = Object.values(data).join(',');
+  // Values into array:
+  csvRows.push(values);
+
+  // Return the array joining with new line
+  return csvRows.join('\n');
+}
 
 
 yargs
@@ -22,7 +41,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -43,7 +62,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -81,7 +100,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -119,7 +138,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -157,7 +176,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -195,7 +214,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -233,7 +252,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -271,7 +290,7 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
@@ -309,7 +328,67 @@ yargs
         // Output the response based on the specified format
         if (argv.format && argv.format.toLowerCase() === 'csv') {
           // Handle CSV format
-          console.log('CSV format not supported for this endpoint');
+          console.log(csvmaker(response.data));
+        } else {
+          // Default to JSON format
+          console.log(JSON.stringify(response.data, null, 2));
+        }
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    },
+  })
+  .command({
+    command: 'get_title',
+    describe: 'Get details from title with the given ID',
+    builder: (yargs) => {
+      return yargs.option('titleID', {
+        describe: 'Title ID',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    handler: async (argv) => {
+      const titleID = argv.titleID;
+
+      try {
+        // Make the corresponding REST API call for titleID
+        const response = await axios.get(`${baseURL}/title/${titleID}`);
+
+        // Output the response based on the specified format
+        if (argv.format && argv.format.toLowerCase() === 'csv') {
+          // Handle CSV format
+          console.log(converter.json2csv(response.data));
+        } else {
+          // Default to JSON format
+          console.log(JSON.stringify(response.data, null, 2));
+        }
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    },
+  })
+  .command({
+    command: 'get_name',
+    describe: 'Get details for actor with the given ID',
+    builder: (yargs) => {
+      return yargs.option('nameID', {
+        describe: 'name ID',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    handler: async (argv) => {
+      const nameID = argv.nameID;
+
+      try {
+        // Make the corresponding REST API call for nameID
+        const response = await axios.get(`${baseURL}/name/${nameID}`);
+
+        // Output the response based on the specified format
+        if (argv.format && argv.format.toLowerCase() === 'csv') {
+          // Handle CSV format
+          console.log(converter.json2csv(response.data));
         } else {
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));

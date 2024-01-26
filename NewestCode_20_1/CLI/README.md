@@ -10,3 +10,17 @@
 7. node cli.js newepisode --filename "C:/Users/Αφροδίτη/tl/NtuaFlix/truncated data/truncated_title.episode.tsv" --format json
 8. node cli.js newprincipals --filename "C:/Users/Αφροδίτη/tl/NtuaFlix/truncated data/truncated_title.principals.tsv" --format json
 9. node cli.js newratings --filename "C:/Users/Αφροδίτη/tl/NtuaFlix/truncated data/truncated_title.ratings.tsv" --format json  
+
+
+
+# Update 1:
+
+- Added 2 methods to diplay csv:
+	- From array: Used in status messages
+	- From JSON: Used in GET endpoints as workaround for data display problems
+- Added 2 endpoints:
+	- GET/title/:titleID
+	- GET/name/:nameID
+
+New package installed:
+	"json-2-csv": "^5.0.1"
