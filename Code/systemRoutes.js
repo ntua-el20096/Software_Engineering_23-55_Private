@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const pool = require('./database'); // Import the database connection pool
 
+const baseURL = '/energy/api';
+
 // Endpoint for fetching title details by titleID
 router.get(`${baseURL}/title/:titleID`, async (req, res) => {
     const titleID = req.params.titleID;
@@ -260,4 +262,3 @@ router.get(`${baseURL}/searchname`, async (req, res) => {
   
 
 module.exports = router;
-
