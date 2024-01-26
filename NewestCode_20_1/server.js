@@ -267,8 +267,9 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
   const connection = mysql.createConnection(databaseConfig);
 
   // console.log(rows);
-  
-  connection.query('INSERT IGNORE INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
+
+  connection.query('SET FOREIGN_KEY_CHECKS=0;')
+  connection.query('INSERT INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
     if (error) {
       const response = {
         status: 'failed',
@@ -281,6 +282,7 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
+      connection.query('SET FOREIGN_KEY_CHECKS=1;')
       res.json(response);
     }
 
@@ -315,8 +317,9 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
   const connection = mysql.createConnection(databaseConfig);
 
   // console.log(rows);
-  
-  connection.query('INSERT IGNORE INTO title_episode (title_episode_id, title_series_id, title_season_NO, title_episode_NO) VALUES ? ON DUPLICATE KEY UPDATE title_episode_id = VALUES(title_episode_id), title_series_id = VALUES(title_series_id), title_season_NO = VALUES(title_season_NO), title_episode_NO = VALUES(title_episode_NO)', [rows], (error, results) => {    
+
+  connection.query('SET FOREIGN_KEY_CHECKS=0;');
+  connection.query('INSERT INTO title_episode (title_episode_id, title_series_id, title_season_NO, title_episode_NO) VALUES ? ON DUPLICATE KEY UPDATE title_episode_id = VALUES(title_episode_id), title_series_id = VALUES(title_series_id), title_season_NO = VALUES(title_season_NO), title_episode_NO = VALUES(title_episode_NO)', [rows], (error, results) => {    
     if (error) {
       const response = {
         status: 'failed',
@@ -329,6 +332,7 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
+      connection.query('SET FOREIGN_KEY_CHECKS=1;');
       res.json(response);
     }
 
