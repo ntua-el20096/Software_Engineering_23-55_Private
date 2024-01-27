@@ -24,3 +24,14 @@
 
 New package installed:
 	"json-2-csv": "^5.0.1"
+
+# Update 2:
+
+- Added 2 more endpoints:
+	- GET/searchtitle
+	- GET/searchname
+
+Both need the package https.
+
+Remaining: 
+	- GET/bygenre

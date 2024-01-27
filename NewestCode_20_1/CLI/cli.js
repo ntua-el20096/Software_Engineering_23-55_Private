@@ -5,6 +5,7 @@ const axios = require('axios');
 const yargs = require('yargs');
 const fs = require('fs');
 const FormData = require('form-data');
+const https = require('https');
 
 
 const baseURL = 'https://localhost:8765/energy/api';
@@ -369,6 +370,74 @@ yargs
     },
   })
   .command({
+    command: 'searchtitle',
+    describe: 'Get title that contains the search word',
+    builder: (yargs) => {
+      return yargs.option('titlePart', {
+        describe: 'Keyword for title search',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    handler: async (argv) => {
+      const titlePart = argv.titlePart;
+
+      try {
+        // Create the data object to be sent in the request body
+        const data = JSON.stringify({
+          titlePart: titlePart
+        });
+  
+        // Set the options for the https.request
+        const options = {
+          hostname: 'localhost', // Replace with your API hostname
+          port: 8765,            // Replace with your API port
+          path: '/energy/api/searchtitle',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length,
+          },
+        };
+  
+        // Make the request using https.request
+        const req = https.request(options, (res) => {
+          let responseData = '';
+  
+          // A chunk of data has been received.
+          res.on('data', (chunk) => {
+            responseData += chunk;
+          });
+  
+          // The whole response has been received.
+          res.on('end', () => {
+            // Output the response based on the specified format
+            if (argv.format && argv.format.toLowerCase() === 'csv') {
+              // Handle CSV format
+              console.log(converter.json2csv(JSON.parse(responseData)));
+            } else {
+              // Default to JSON format
+              console.log(JSON.stringify(JSON.parse(responseData), null, 2));
+            }
+          });
+        });
+  
+        // Handle errors
+        req.on('error', (error) => {
+          console.error('Error:', error.message);
+        });
+  
+        // Send the request body
+        req.write(data);
+  
+        // End the request
+        req.end();
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    },
+  })
+  .command({
     command: 'get_name',
     describe: 'Get details for actor with the given ID',
     builder: (yargs) => {
@@ -393,6 +462,74 @@ yargs
           // Default to JSON format
           console.log(JSON.stringify(response.data, null, 2));
         }
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    },
+  })
+  .command({
+    command: 'searchname',
+    describe: 'Get name that contains the search word',
+    builder: (yargs) => {
+      return yargs.option('namePart', {
+        describe: 'Keyword for name search',
+        type: 'string',
+        demandOption: true,
+      });
+    },
+    handler: async (argv) => {
+      const namePart = argv.namePart;
+
+      try {
+        // Create the data object to be sent in the request body
+        const data = JSON.stringify({
+          namePart: namePart
+        });
+  
+        // Set the options for the https.request
+        const options = {
+          hostname: 'localhost', // Replace with your API hostname
+          port: 8765,            // Replace with your API port
+          path: '/energy/api/searchname',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length,
+          },
+        };
+  
+        // Make the request using https.request
+        const req = https.request(options, (res) => {
+          let responseData = '';
+  
+          // A chunk of data has been received.
+          res.on('data', (chunk) => {
+            responseData += chunk;
+          });
+  
+          // The whole response has been received.
+          res.on('end', () => {
+            // Output the response based on the specified format
+            if (argv.format && argv.format.toLowerCase() === 'csv') {
+              // Handle CSV format
+              console.log(converter.json2csv(JSON.parse(responseData)));
+            } else {
+              // Default to JSON format
+              console.log(JSON.stringify(JSON.parse(responseData), null, 2));
+            }
+          });
+        });
+  
+        // Handle errors
+        req.on('error', (error) => {
+          console.error('Error:', error.message);
+        });
+  
+        // Send the request body
+        req.write(data);
+  
+        // End the request
+        req.end();
       } catch (error) {
         console.error('Error:', error.message);
       }

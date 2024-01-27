@@ -648,49 +648,37 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
 
 // Define an endpoint handler for /searchname
 app.get(`${baseURL}/searchname`, async (req, res) => {
-  const namePart = req.query.namePart;
+  const namePart = req.body.namePart; // Extract namePart from request body
+
+  if (!namePart) {
+    return res.status(400).json({ status: 'failed', message: 'namePart is required' });
+  }
+
+  const query = `SELECT * FROM principal WHERE principal_name LIKE ?`;
+  const likenamePart = `%${namePart}%`; // SQL LIKE query format
 
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  try {
-      // Query to search for names that contain the namePart
-      const query = `
-          SELECT 
-              principal_id AS nameID, 
-              principal_name AS name, 
-              principal_imageURL AS namePoster, 
-              principal_birthYr AS birthYr, 
-              principal_deathYr AS deathYr, 
-              principal_profession AS profession
-          FROM principal
-          WHERE principal_name LIKE ?`;
+  connection.query(query, [likenamePart], (error, results) => {
+    if (error) {
+      const response = {
+        status: 'failed',
+        message: 'Database query failed',
+        error: error.message
+      };
+      res.json(response);
+    } else {
+      const response = {
+        status: 'success',
+        data: results // Send the found names back
+      };
+      res.json(response);
+    }
 
-      // Execute the query
-      const [results] = await connection.promise().query(query, [`%${namePart}%`]);
-
-      // Format the results as a list of nameObjects
-      const nameObjects = results.map(result => {
-          return {
-              nameID: result.nameID,
-              name: result.name,
-              namePoster: result.namePoster,
-              birthYr: result.birthYr,
-              deathYr: result.deathYr,
-              profession: result.profession,
-              // Add any additional fields here as needed
-          };
-      });
-
-      // Return the results
-      res.json(nameObjects);
-  } catch (error) {
-      console.error('Database error:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
-  } finally {
-      // Close the database connection
-      connection.end();
-  }
+    // Close the database connection after the query
+    connection.end();
+  });
 });
 
 
