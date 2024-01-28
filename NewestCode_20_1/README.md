@@ -10,4 +10,7 @@ title_crew and title_episode NEEDS *INSERT IGNORE* to upload ID's that aren't ye
 
 Endpoint /searchname now works BUT not fully implemented:
 	- Needs to join title_principals jobs
-	- Needs to remove imageURL and maybe some other stuff
+
+# UPDATE:
+
+Endpoint /searchname now should work as needed :)

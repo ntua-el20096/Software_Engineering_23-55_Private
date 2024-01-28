@@ -654,31 +654,49 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
     return res.status(400).json({ status: 'failed', message: 'namePart is required' });
   }
 
-  const query = `SELECT * FROM principal WHERE principal_name LIKE ?`;
-  const likenamePart = `%${namePart}%`; // SQL LIKE query format
-
-  // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  connection.query(query, [likenamePart], (error, results) => {
-    if (error) {
-      const response = {
-        status: 'failed',
-        message: 'Database query failed',
-        error: error.message
-      };
-      res.json(response);
-    } else {
-      const response = {
-        status: 'success',
-        data: results // Send the found names back
-      };
-      res.json(response);
+  try {
+    const query = `SELECT 
+    np.principal_id AS nameID, 
+    np.principal_name AS name, 
+    np.principal_imageURL AS namePoster, 
+    np.principal_birthYr AS birthYr, 
+    np.principal_deathYr AS deathYr, 
+    np.principal_profession AS profession
+    FROM principal np
+    WHERE np.principal_name LIKE ?`;
+    const likenamePart = `%${namePart}%`; // SQL LIKE query format
+
+    const [nameResult] = await connection.promise().query(query, [likenamePart]);
+
+    if (!nameResult.length) {
+      return res.status(404).json({ message: 'No match found'});
     }
 
-    // Close the database connection after the query
+    var nameObjectList = [];
+    for (var i = 0; i < nameResult.length; i++) {
+      var nameObject = nameResult[i];
+      const titlesQuery = `
+          SELECT 
+              tp.title_title_id AS titleID, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          WHERE tp.principal_principal_id = ?`;
+      const [titlesResult] = await connection.promise().query(titlesQuery, [nameObject.nameID]);
+      nameObject.nameTitles = titlesResult;
+      nameObjectList.push(nameObject);
+    }    
+
+    res.json({ nameObjectList });
+
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
     connection.end();
-  });
+  }
+  
 });
 
 
