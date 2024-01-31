@@ -6,14 +6,14 @@ server.js: fully done endpoints 1-9, populating the database, but 3,5,6 endpoint
 title_crew and title_episode NEEDS *INSERT IGNORE* to upload ID's that aren't yet inserted to referenced tables.
 
 
-# ~~UPDATE:
+# UPDATE:
 
-Endpoint /searchname now works BUT not fully implemented:
-	- Needs to join title_principals jobs
+~~Endpoint /searchname now works BUT not fully implemented:
+	- Needs to join title_principals jobs~~
 
 # UPDATE:
 
-Endpoint /searchname now should work as needed :)~~
+~~Endpoint /searchname now should work as needed :)~~
 
 # UPDATE: 
 
