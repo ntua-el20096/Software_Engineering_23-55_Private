@@ -35,3 +35,7 @@ Both need the package https.
 
 Remaining: 
 	- GET/bygenre
+
+# Update 3:
+
+- GET/bygenre is now also implemented and working (some tests are needed tho :D )

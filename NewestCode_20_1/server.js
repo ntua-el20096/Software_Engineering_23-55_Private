@@ -542,7 +542,7 @@ app.get(`${baseURL}/searchtitle`, (req, res) => {
 });
 
 app.get(`${baseURL}/bygenre`, async (req, res) => {
-  const { qgenre, minrating, yrFrom, yrTo } = req.query;
+  const { qgenre, minrating, yrFrom, yrTo } = req.body;
 
   // Start building the query
   let query = `

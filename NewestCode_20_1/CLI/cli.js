@@ -438,6 +438,100 @@ yargs
     },
   })
   .command({
+    command: 'bygenre',
+    describe: 'Get titles that match given genre and minimum rating',
+    builder: (yargs) => {
+      return yargs.option(
+        'qgenre', {
+        describe: 'Genre for title search',
+        type: 'string',
+        demandOption: true,
+      })
+      .option(
+      'minrating', {
+      describe: 'Minimum rating for movie search',
+      type: 'string',
+      demandOption: true
+      })
+      .option(
+        'yrFrom',{
+        describe: 'Optional minimum airing year',
+        type: 'int',
+        demandOption: false
+        })
+      .option(
+        'yrTo', {
+          describe: 'Optional maximum airing end year',
+          type: 'int',
+          demandOption: false
+          }
+      );
+    },
+    handler: async (argv) => {
+      const qgenre = argv.qgenre;
+      const minrating = argv.minrating;
+      const yrFrom = argv.yrFrom;
+      const yrTo = argv.yrTo;
+
+      try {
+        // Create the data object to be sent in the request body
+        const data = JSON.stringify({
+          qgenre: qgenre,
+          minrating: minrating,
+          yrFrom: yrFrom,
+          yrTo: yrTo
+        });
+  
+        // Set the options for the https.request
+        const options = {
+          hostname: 'localhost', // Replace with your API hostname
+          port: 8765,            // Replace with your API port
+          path: '/energy/api/bygenre',
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Content-Length': data.length,
+          },
+        };
+  
+        // Make the request using https.request
+        const req = https.request(options, (res) => {
+          let responseData = '';
+  
+          // A chunk of data has been received.
+          res.on('data', (chunk) => {
+            responseData += chunk;
+          });
+  
+          // The whole response has been received.
+          res.on('end', () => {
+            // Output the response based on the specified format
+            if (argv.format && argv.format.toLowerCase() === 'csv') {
+              // Handle CSV format
+              console.log(converter.json2csv(JSON.parse(responseData)));
+            } else {
+              // Default to JSON format
+              console.log(JSON.stringify(JSON.parse(responseData), null, 2));
+            }
+          });
+        });
+  
+        // Handle errors
+        req.on('error', (error) => {
+          console.error('Error:', error.message);
+        });
+  
+        // Send the request body
+        req.write(data);
+  
+        // End the request
+        req.end();
+      } catch (error) {
+        console.error('Error:', error.message);
+      }
+    },
+  })
+  .command({
     command: 'get_name',
     describe: 'Get details for actor with the given ID',
     builder: (yargs) => {

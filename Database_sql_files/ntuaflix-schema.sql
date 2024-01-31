@@ -76,7 +76,7 @@ CREATE TABLE IF NOT EXISTS `title_principals` (
     
 CREATE TABLE IF NOT EXISTS `title_ratings` (
 	`title_title_id` VARCHAR(255) NOT NULL,
-	`rating_avg` FLOAT NOT NULL,
+	`rating_avg` VARCHAR(255) NOT NULL,
 	`rating_numVotes` INT NOT NULL,
 	PRIMARY KEY (`title_title_id`),
 	CONSTRAINT `fk_rating_title_id`
