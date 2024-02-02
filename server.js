@@ -1,17 +1,26 @@
 //what does this code do? Connecting to the server which listens 
-//on the "http://localhost:8765/" and it connects to the database and 
+//on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
 //3,5,6 endpoints don't work because of the foreign keys? or not idk
 //3. title_akas, 5. title_crew, 6. title_episode
 
 const mysql = require('mysql2');
 const express = require('express');
+const https = require('https');
 const multer = require('multer');
 const fs = require('fs');
+const path = require('path');
+ 
+const httpsOptions = {
+  key: fs.readFileSync('server.key', 'utf8'),
+  cert: fs.readFileSync('server.crt', 'utf8'),
+  passphrase: '2372002'
+};
 
 const app = express();
 
 const port = 8765;
+const baseURL = '/energy/api';
 
 // Simulated database connection string
 const databaseConfig = {
@@ -19,7 +28,8 @@ const databaseConfig = {
   user: 'root',
   password: '',
   database: 'ntuaflix',
-  port: 3307
+    port: 3307
+
 };
 
 const databaseConnectionString = JSON.stringify(databaseConfig);
@@ -27,44 +37,11 @@ const databaseConnectionString = JSON.stringify(databaseConfig);
 const upload = multer();
 
 app.use(express.json());
-//
-
-// Route for a successful API call
-app.get('/api/success', (req, res) => {
-  res.status(200).json({messege: ' success ' });
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => {
+  // Assuming you want to serve the index.html file
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
-
-// Route for a successful API call with no data
-app.get('/api/no_data', (req, res) => {
-  res.status(204).send();
-});
-
-// Route for a bad request
-app.get('/api/bad_request', (req, res) => {
-  res.status(400).json({ error: 'Bad request' });
-});
-
-// Route for an unauthorized request
-app.get('/api/unauthorized', (req, res) => {
-  res.status(401).json({ error: 'Unauthorized' });
-});
-
-// Route for a not found error
-app.get('/api/not_found', (req, res) => {
-  res.status(404).json({ error: 'Not found' });
-});
-
-// Route for an internal server error
-app.get('/api/internal_error', (req, res) => {
-  // Simulate an internal error
-  // In a real-world scenario, you would log the error and handle it accordingly
-  res.status(500).json({ error: 'Internal server error' });
-});
-
-  
-
-
-
 // Multer configuration for handling file uploads
 const storage = multer.memoryStorage();
 // const upload = multer({ storage: storage });
@@ -79,7 +56,7 @@ async function resetTable(tableName) {
 }
 
 // Define an endpoint handler for /admin/healthcheck
-app.get('/admin/healthcheck', (req, res) => {
+app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
   // Simulate the database connectivity check
   const connection = mysql.createConnection(databaseConfig);
 
@@ -106,145 +83,87 @@ app.get('/admin/healthcheck', (req, res) => {
 });
 
 // Define an endpoint handler for /admin/upload/titlebasics
-app.post('/admin/upload/titlebasics', upload.single('truncated_title.basics'), (req, res) => {
-  const fileData = req.file; // Assuming the uploaded file is in req.file
+// Define an endpoint handler for /admin/upload/titlebasics
+app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.basics'), (req, res) => {
+  const fileData = req.file;
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
-  } //checks that it has a file in the body
+    return res.status(400).json(response); // Bad Request: No file uploaded
+  }
 
-
-  const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
+  const filePath = fileData.path;
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
-  // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-
-  // connection.query('INSERT INTO `title_basics` (title_id, title_type, title_primaryTitle, title_originalTitle, title_isAdult, title_startYear, title_endYear, title_runtimeMinutes, title_genre, title_posterURL) VALUES ?', [rows], (error, results) => {    
-
-  // Insert data into the 'titlebasics' table
-  connection.query('INSERT INTO title_basics (title_id, title_type, title_primaryTitle, title_originalTitle, title_isAdult, title_startYear, title_endYear, title_runtimeMinutes, title_genre, title_posterURL) VALUES ? ON DUPLICATE KEY UPDATE title_id = VALUES(title_id), title_type = VALUES(title_type), title_primaryTitle = VALUES(title_primaryTitle), title_originalTitle = VALUES(title_originalTitle), title_isAdult = VALUES(title_isAdult), title_startYear = VALUES(title_startYear), title_endYear = VALUES(title_endYear), title_runtimeMinutes = VALUES(title_runtimeMinutes), title_genre = VALUES(title_genre), title_posterURL = VALUES(title_posterURL)', [rows], (error, results) => {    
+  connection.query('INSERT INTO title_basics (title_id, title_type, title_primaryTitle, title_originalTitle, title_isAdult, title_startYear, title_endYear, title_runtimeMinutes, title_genre, title_posterURL) VALUES ? ON DUPLICATE KEY UPDATE title_id = VALUES(title_id), title_type = VALUES(title_type), title_primaryTitle = VALUES(title_primaryTitle), title_originalTitle = VALUES(title_originalTitle), title_isAdult = VALUES(title_isAdult), title_startYear = VALUES(title_startYear), title_endYear = VALUES(title_endYear), title_runtimeMinutes = VALUES(title_runtimeMinutes), title_genre = VALUES(title_genre), title_posterURL = VALUES(title_posterURL)', [rows], (error, results) => {
     if (error) {
       const response = {
         status: 'failed',
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // OK
+      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
     }
 
-
-    // Close the database connection after the insertion
     connection.end();
   });
 });
-app.post('/admin/upload/titleakas', upload.single('truncated_title.akas'), (req, res) => {
-  const fileData = req.file; // Assuming the uploaded file is in req.file
 
-  if (!fileData) {
-    const response = {
-      status: 'failed',
-      message: 'No file uploaded'
-    };
-    return res.json(response);
-  } //checks that it has a file in the body
 
-  const filePath = fileData.path; 
-  const rawData = fileData.buffer.toString('utf-8');
-  const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // Establish a connection to the database
-  const connection = mysql.createConnection(databaseConfig);
-
-  // Insert data into the 'titleakas' table
-  connection.query('INSERT INTO title_AKAs (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {    
-    if (error) {
-      const response = {
-        status: 'failed',
-        message: 'Database insertion failed',
-        error: error.message
-      };
-      res.status(500).json(response); // Internal Server Error
-    } else {
-      const response = {
-        status: 'success',
-        message: 'Data uploaded and inserted into the database successfully'
-      };
-      res.status(200).json(response); // OK
-    }
-
-    // Close the database connection after the insertion
-    connection.end();
-  });
-});
-/*
 // Define an endpoint handler for /admin/upload/titleakas
-app.post('/admin/upload/titleakas', upload.single('truncated_title.akas'), (req, res) => {
-  const fileData = req.file; // Assuming the uploaded file is in req.file
+app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.akas'), (req, res) => {
+  const fileData = req.file;
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
-  } //checks that it has a file in the body
+    return res.status(400).json(response); // Bad Request: No file uploaded
+  }
 
-
-  const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
+  const filePath = fileData.path;
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
-  // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  // console.log(rows);
-  // Insert data into the 'titleakas' table
-  connection.query('INSERT INTO title_AKAs (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {    
-  // connection.query('INSERT INTO title_akas (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ?', [rows], (error, results) => {    
+  connection.query('INSERT INTO title_AKAs (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {
     if (error) {
       const response = {
         status: 'failed',
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
     }
 
-
-    // Close the database connection after the insertion
     connection.end();
   });
 });
-*/
+
+
 // Define an endpoint handler for /admin/upload/namebasics
-app.post('/admin/upload/namebasics', upload.single('truncated_name.basics'), (req, res) => {
+app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.basics'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -311,7 +230,7 @@ app.post('/admin/upload/namebasics', upload.single('truncated_name.basics'), (re
 });
 
 // Define an endpoint handler for /admin/upload/titlecrew
-app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.crew'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -319,7 +238,8 @@ app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req,
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
+  return;
   } //checks that it has a file in the body
 
 
@@ -336,7 +256,7 @@ app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req,
 
   // console.log(rows);
   
-  connection.query('INSERT INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
+  connection.query('INSERT IGNORE INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
     if (error) {
       const response = {
         status: 'failed',
@@ -349,7 +269,7 @@ app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req,
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -359,7 +279,7 @@ app.post('/admin/upload/titlecrew', upload.single('truncated_title.crew'), (req,
 });
 
 // Define an endpoint handler for /admin/upload/titleepisode
-app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.episode'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -367,8 +287,8 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
-  } //checks that it has a file in the body
+    res.status(400).json(response); // Bad Request: No file uploaded
+    return;  } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
@@ -376,7 +296,7 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
   // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
-
+  
   // console.log(rows);
 
   // Establish a connection to the database
@@ -384,7 +304,7 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
 
   // console.log(rows);
   
-  connection.query('INSERT INTO title_episode (title_episode_id, title_series_id, title_season_NO, title_episode_NO) VALUES ? ON DUPLICATE KEY UPDATE title_episode_id = VALUES(title_episode_id), title_series_id = VALUES(title_series_id), title_season_NO = VALUES(title_season_NO), title_episode_NO = VALUES(title_episode_NO)', [rows], (error, results) => {    
+  connection.query('INSERT IGNORE INTO title_episode (title_episode_id, title_series_id, title_season_NO, title_episode_NO) VALUES ? ON DUPLICATE KEY UPDATE title_episode_id = VALUES(title_episode_id), title_series_id = VALUES(title_series_id), title_season_NO = VALUES(title_season_NO), title_episode_NO = VALUES(title_episode_NO)', [rows], (error, results) => {    
     if (error) {
       const response = {
         status: 'failed',
@@ -397,7 +317,7 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -407,7 +327,7 @@ app.post('/admin/upload/titleepisode', upload.single('truncated_title.episode'),
 });
 
 // Define an endpoint handler for /admin/upload/titleprincipals
-app.post('/admin/upload/titleprincipals', upload.single('truncated_title.principals'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_title.principals'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -415,8 +335,9 @@ app.post('/admin/upload/titleprincipals', upload.single('truncated_title.princip
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
-  } //checks that it has a file in the body
+    res.status(400).json(response); // Bad Request: No file uploaded
+    return;
+  }//checks that it has a file in the body
 
 
   const filePath = fileData.path; 
@@ -445,7 +366,7 @@ app.post('/admin/upload/titleprincipals', upload.single('truncated_title.princip
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -455,7 +376,7 @@ app.post('/admin/upload/titleprincipals', upload.single('truncated_title.princip
 });
 
 // Define an endpoint handler for /admin/upload/titleratings
-app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'), (req, res) => {
+app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.ratings'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
 
   if (!fileData) {
@@ -463,7 +384,8 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
+    return;
   } //checks that it has a file in the body
 
 
@@ -493,7 +415,7 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -502,11 +424,267 @@ app.post('/admin/upload/titleratings', upload.single('truncated_title.ratings'),
   });
 });
 
+
+// Define an endpoint handler for /title/:titleID
+app.get(`${baseURL}/title/:titleID`, async (req, res) => {
+  const titleID = req.params.titleID;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to fetch data for the titleObject
+      const titleQuery = `
+          SELECT 
+              tb.title_id AS titleID, 
+              tb.title_type AS type, 
+              tb.title_originalTitle AS originalTitle, 
+              tb.title_posterURL AS titlePoster, 
+              tb.title_startYear AS startYear, 
+              tb.title_endYear AS endYear, 
+              tb.title_genre AS genres,
+              tr.rating_avg AS avRating,
+              tr.rating_numVotes AS nVotes
+          FROM title_basics tb
+          LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+          WHERE tb.title_id = ?`;
+
+      // Execute the query
+      const [titleResult] = await connection.promise().query(titleQuery, [titleID]);
+
+      if (!titleResult.length) {
+          return res.status(404).json({ message: 'Title not found' });
+      }
+
+      const titleObject = titleResult[0];
+
+      // Fetch genres
+      // Assuming the genres are stored in a comma-separated string
+      titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+
+      // Fetch titleAkas
+      const akasQuery = `SELECT aka_title AS akaTitle, AKA_region AS regionAbbrev FROM title_AKAs WHERE title_title_id = ?`;
+      const [akasResult] = await connection.promise().query(akasQuery, [titleID]);
+      titleObject.titleAkas = akasResult;
+
+      // Fetch principals
+      const principalsQuery = `
+          SELECT 
+              np.principal_id AS nameID, 
+              np.principal_name AS name, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          JOIN principal np ON tp.principal_principal_id = np.principal_id
+          WHERE tp.title_title_id = ?`;
+      const [principalsResult] = await connection.promise().query(principalsQuery, [titleID]);
+      titleObject.principals = principalsResult;
+
+      // Return the titleObject
+      res.status(200).json({ titleObject });
+    } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
+
+
+
+// Define an endpoint handler for /searchtitle
+app.get(`${baseURL}/searchtitle`, (req, res) => {
+  const titlePart = req.body.titlePart; // Extract titlePart from request body
+
+  if (!titlePart) {
+    return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+  }
+
+  const query = `SELECT * FROM title_basics WHERE title_originalTitle LIKE ?`;
+  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  connection.query(query, [likeTitlePart], (error, results) => {
+    if (error) {
+      const response = {
+        status: 'failed',
+        message: 'Database query failed',
+        error: error.message
+      };
+      res.json(response);
+    } else {
+      const response = {
+        status: 'success',
+        data: results // Send the found titles back
+      };
+      res.json(response);
+    }
+
+    // Close the database connection after the query
+    connection.end();
+  });
+});
+
+app.get(`${baseURL}/bygenre`, async (req, res) => {
+  const { qgenre, minrating, yrFrom, yrTo } = req.query;
+
+  // Start building the query
+  let query = `
+      SELECT 
+          tb.title_id AS titleID, 
+          tb.title_type AS type, 
+          tb.title_originalTitle AS originalTitle, 
+          tb.title_posterURL AS titlePoster, 
+          tb.title_startYear AS startYear, 
+          tb.title_endYear AS endYear, 
+          tb.title_genre AS genres,
+          tr.rating_avg AS avRating
+      FROM title_basics tb
+      LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+      WHERE tb.title_genre LIKE ? AND tr.rating_avg >= ?
+  `;
+
+  const queryParams = [`%${qgenre}%`, minrating];
+
+  // Add year range conditions if provided
+  if (yrFrom) {
+      query += ` AND tb.title_startYear >= ?`;
+      queryParams.push(yrFrom);
+  }
+  if (yrTo) {
+      query += ` AND tb.title_startYear <= ?`;
+      queryParams.push(yrTo);
+  }
+
+  try {
+      // Establish a connection to the database
+      const connection = mysql.createConnection(databaseConfig);
+
+      // Execute the query
+      const [results] = await connection.promise().query(query, queryParams);
+
+      // Format the results
+      const formattedResults = results.map(result => {
+          result.genres = result.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+          return result;
+      });
+
+      // Return the results
+      res.status(200).json(formattedResults);
+
+      // Close the database connection
+      connection.end();
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+});
+
+// Define an endpoint handler for /name/:nameID
+app.get(`${baseURL}/name/:nameID`, async (req, res) => {
+  const nameID = req.params.nameID;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to fetch data for the nameObject
+      const nameQuery = `
+          SELECT 
+              np.principal_id AS nameID, 
+              np.principal_name AS name, 
+              np.principal_imageURL AS namePoster, 
+              np.principal_birthYr AS birthYr, 
+              np.principal_deathYr AS deathYr, 
+              np.principal_profession AS profession
+          FROM principal np
+          WHERE np.principal_id = ?`;
+
+      // Execute the query for name details
+      const [nameResult] = await connection.promise().query(nameQuery, [nameID]);
+
+      if (!nameResult.length) {
+          return res.status(404).json({ message: 'Name not found' });
+      }
+
+      const nameObject = nameResult[0];
+
+      // Fetch nameTitles
+      const titlesQuery = `
+          SELECT 
+              tp.title_title_id AS titleID, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          WHERE tp.principal_principal_id = ?`;
+      const [titlesResult] = await connection.promise().query(titlesQuery, [nameID]);
+      nameObject.nameTitles = titlesResult;
+
+      // Return the nameObject
+      res.status(200).json({ nameObject });
+    } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
+
+// Define an endpoint handler for /searchname
+app.get(`${baseURL}/searchname`, async (req, res) => {
+  const namePart = req.query.namePart;
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+      // Query to search for names that contain the namePart
+      const query = `
+          SELECT 
+              principal_id AS nameID, 
+              principal_name AS name, 
+              principal_imageURL AS namePoster, 
+              principal_birthYr AS birthYr, 
+              principal_deathYr AS deathYr, 
+              principal_profession AS profession
+          FROM principal
+          WHERE principal_name LIKE ?`;
+
+      // Execute the query
+      const [results] = await connection.promise().query(query, [`%${namePart}%`]);
+
+      // Format the results as a list of nameObjects
+      const nameObjects = results.map(result => {
+          return {
+              nameID: result.nameID,
+              name: result.name,
+              namePoster: result.namePoster,
+              birthYr: result.birthYr,
+              deathYr: result.deathYr,
+              profession: result.profession,
+              // Add any additional fields here as needed
+          };
+      });
+
+      // Return the results
+      res.status(200).json(nameObjects);
+
+  } catch (error) {
+      console.error('Database error:', error);
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    } finally {
+      // Close the database connection
+      connection.end();
+  }
+});
+
+
 // Define an endpoint handler for /admin/resetall
-app.post('/admin/resetall', async (req, res) => {
+app.post(`${baseURL}/admin/resetall`, async (req, res) => {
   try {
     // Reset data in each table
-    
     await resetTable('title_episode');
     await resetTable('title_crew');
     await resetTable('title_akas');
@@ -514,14 +692,13 @@ app.post('/admin/resetall', async (req, res) => {
     await resetTable('principal');
     await resetTable('title_ratings');
     await resetTable('title_basics');
-    
 
     // For demonstration purposes, let's assume resetting is successful
     const response = {
       status: 'OK',
     };
 
-    res.json(response);
+    res.status(200).json(response); // Success: Data reset successfully
   } catch (error) {
     // If an error occurs during the reset operation
     const response = {
@@ -529,22 +706,25 @@ app.post('/admin/resetall', async (req, res) => {
       reason: error.message, // Provide the specific reason for failure
     };
 
-    res.status(500).json(response);
+    res.status(500).json(response); // Internal Server Error: Data reset failed
   }
 });
 
-app.listen(port, () => {
+
+const httpsServer = https.createServer({
+  key: httpsOptions.key,
+  cert: httpsOptions.cert,
+  passphrase: httpsOptions.passphrase 
+}, app);
+
+httpsServer.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
 
 
+ 
+ 
 
 
 
-
-
-
-
-
-
-
+ 
