@@ -1,135 +1,155 @@
-<!-- public/index.html -->
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>NTUAFlix</title>
-  <style>
-    
-    body {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 100vh;
-    margin: 0;
-    background-image: url('/popcorn.webp'); /* Updated path */
-    background-size: cover;
-    background-position: center;
-  }
-   .search-container {
-    text-align: center;
-    color: white; /* Text color */
-  }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Bar Animation</title>
+    <style>
+        /* basic styling */
+         * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+         }
 
-  .search-input {
-    padding: 10px;
-    width: 300px;
-    font-size: 16px;
-    background-color: black; /* Background color */
-    color: white; /* Text color */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Optional: Add border-radius for a rounded look */
-  }
+         html, 
+         body {
+            width: 100%;
+            height: 100%;
+         }
 
+         /* enter everythin , body basic styling */
+         body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background-color: #111;
+            font-family: "Ubuntu", sans-serif;
+         }
 
-  .search-button {
-    padding: 10px;
-    font-size: 16px;
-    background-color: black; /* Background color */
-    color: white; /* Text color */
-    border: none; /* Remove border */
-    border-radius: 5px; /* Optional: Add border-radius for a rounded look */
-    cursor: pointer;
-  }
- 
-    body {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      height: 100vh;
-      margin: 0;
-    }
+         /* css for searchbar field */
+         .searchfield {
+            font-weight: 600;
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            outline: none;
+            border: none;
+            background: #fff;
+            color: #111;
+            text-shadow: 0 0 10px #ccc;
+            padding: 0 80px 0 20px;
+            border-radius: 30px;
+            box-shadow: 12px 13px 15px 0 #111, 8px 9px 25px 0 rgba(0, 0, 0, 0.2);
+            transition: all 1s;
+            opacity: 0;
+            z-index: 5;
+            font-weight: bolder;
+            letter-spacing: 0.1em;
+         }
 
-    .search-container {
-      text-align: center;
-    }
+         /* pointer cursor on search bar field hover */
+         .searchfield:hover {
+            cursor: pointer;
+         }
 
-    .search-input {
-      padding: 10px;
-      width: 300px;
-      font-size: 16px;
-    }
-    .search-container h1 {
-  color: black; /* Set the text color to black */
-}
-    .search-button {
-      padding: 10px;
-      font-size: 16px;
-    }
-  </style>
+         /* css for search icon and cancel icon */
+         .search {
+            position: absolute;
+            margin: auto;
+            top: 0;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            width: 50px;
+            height: 50px;
+            background: #fff;
+            border-radius: 50%;
+            transition: all 1s;
+            z-index: 4;
+         }
+
+         /* pointer cursor on search , cancel icon hover */
+         .search:hover {
+            cursor: pointer
+         }
+
+         /* search icon */
+         .search::before {
+            content: "";
+            position: absolute;
+            margin: auto;
+            top: 10px;
+            right: 8px;
+            bottom: -5px;
+            left: 22px;
+            width: 12px;
+            height: 2px;
+            background-color: #111;
+            transform: rotate(45deg);
+         }
+
+         .search::after {
+            content: "";
+            position: absolute;
+            margin: auto;
+            top: -5px;
+            right: 0;
+            bottom: 0;
+            left: -5px;
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            border: 2px solid #111;
+        }
+
+        /* expand width of searchfield on focus */
+        .searchfield:focus {
+            width: 300px;
+            opacity: 1;
+            cursor: text;
+        }
+
+        .searchfield:focus~.search {
+            right: -240px;
+            background: transparent;
+            z-index: 6;
+        }
+
+        /* css for cancel icon */
+        .searchfield:focus~.search::before {
+            top: 28px;
+            left: 15px;
+            width: 25px;
+            height: 2px;
+            bottom: 25px;
+        }
+
+        .searchfield:focus~.search::after {
+            top: 29px;
+            left: -8px;
+            width: 25px;
+            right: -15px;
+            height: 2px;
+            border: none;
+            bottom: 25px;
+            background: #111;
+            border-radius: 0%;
+            transform: rotate(-45deg);
+        }
+    </style>
 </head>
 <body>
-
-  <div class="search-container">
-    <h1>Welcome to NTUAFlix</h1>
     
-      
-    <!-- Search bar -->
-    <form action="/search" method="get">
-      <input type="text" name="q" class="search-input" placeholder="Search...">
-      <button type="submit" class="search-button">Search</button>
-    </form>
-  </div>
+    <!-- markup of search bar -->
+    <input type="text" class="searchfield">
+    <div class="search"></div>
 
 </body>
 </html>
-<script>
-    // Προσθέστε τα παραδείγματα κώδικα εδώ
-  
-    // Health check endpoint
-    fetch('https://localhost:8765/energy/api/admin/healthcheck')
-      .then(response => response.json())
-      .then(data => console.log(data))
-      .catch(error => console.error('Error:', error));
-
-
-      fetch('https://localhost:8765/energy/api/admin/upload/titlebasics', {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-    body: new FormData(), // Εδώ προσθέστε τα δεδομένα που θέλετε να αποστείλετε
-  })
-    .then(response => response.json())
-    .then(data => console.log('Upload Title Basics:', data))
-    .catch(error => console.error('Upload Title Basics Error:', error));
-    // Και τα άλλα παραδείγματα κώδικα για τα υπόλοιπα end points
-
-    const titlePart = 'YourSearchTerm';  // Replace 'YourSearchTerm' with the actual search term
-  fetch(`https://localhost:8765/energy/api/searchtitle?titlePart=${titlePart}`)
-    .then(response => response.json())
-    .then(data => console.log('Search Title Basics:', data))
-    .catch(error => console.error('Search Title Basics Error:', error));
-
-  // Search by Genre - Similar fetch call for other search endpoints
-
-  // Get Title Details
-  const titleID = 'YourTitleID';  // Replace 'YourTitleID' with the actual title ID
-  fetch(`https://localhost:8765/energy/api/title/${titleID}`)
-    .then(response => response.json())
-    .then(data => console.log('Get Title Details:', data))
-    .catch(error => console.error('Get Title Details Error:', error));
-
-  // Get Name Details - Similar fetch call for other get details endpoints
-
-  // Reset All Data
-  fetch('https://localhost:8765/energy/api/admin/resetall', {
-    method: 'POST',
-  })
-    .then(response => response.json())
-    .then(data => console.log('Reset All Data:', data))
-    .catch(error => console.error('Reset All Data Error:', error));
-
-  </script>
