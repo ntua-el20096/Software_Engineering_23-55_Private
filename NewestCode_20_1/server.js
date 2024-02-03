@@ -1,7 +1,3 @@
-//what does this code do? Connecting to the server which listens 
-//on the "https://localhost:8765/" and it connects to the database and 
-//executes the endpoints 1-9, populating the db
-
 const mysql = require('mysql2');
 const express = require('express');
 const https = require('https');
@@ -32,10 +28,10 @@ const databaseConnectionString = JSON.stringify(databaseConfig);
 const upload = multer();
 
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static('public'));
 app.get('/', (req, res) => {
   // Assuming you want to serve the index.html file
-  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  res.sendFile(path.join('public', 'index.html'));
 });
 
 // Multer configuration for handling file uploads
