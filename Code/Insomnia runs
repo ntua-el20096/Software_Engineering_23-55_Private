@@ -1,5 +1,0 @@
-a) https://localhost:8765/searchtitle with json: {"titlePart": "Klebolin klebt"}
-b) https://localhost:8765/title/tt0000929
-c) https://localhost:8765/bygenre?qgenre=Comedy&minrating=4&yrFrom=1980&yrTo=2000
-d) https://localhost:8765/name/nm0000030
-e) https://localhost:8765/searchname?namePart=John
