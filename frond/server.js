@@ -67,14 +67,14 @@ app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
         status: 'failed',
         dataconnection: [databaseConnectionString]
       };
-      res.json(response);
+      res.status(404).json(response);
     } else {
       // Build the response JSON object for success
       const response = {
         status: 'OK',
         dataconnection: [databaseConnectionString]
       };
-      res.json(response);
+      res.status(200).json(response);
 
       // Close the database connection after the check
       connection.end();

@@ -1,8 +1,6 @@
 //what does this code do? Connecting to the server which listens 
 //on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
-//3,5,6 endpoints don't work because of the foreign keys? or not idk
-//3. title_akas, 5. title_crew, 6. title_episode
 
 const mysql = require('mysql2');
 const express = require('express');
@@ -34,10 +32,14 @@ const databaseConnectionString = JSON.stringify(databaseConfig);
 const upload = multer();
 
 app.use(express.json());
+app.use(express.static(path.join(__dirname, 'public')));
+app.get('/', (req, res) => {
+  // Assuming you want to serve the index.html file
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
+});
 
 // Multer configuration for handling file uploads
 const storage = multer.memoryStorage();
-// const upload = multer({ storage: storage });
 
 // Create a MySQL pool
 const pool = mysql.createPool(databaseConfig);
@@ -60,14 +62,14 @@ app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
         status: 'failed',
         dataconnection: [databaseConnectionString]
       };
-      res.json(response);
+      res.status(404).json(response);
     } else {
       // Build the response JSON object for success
       const response = {
         status: 'OK',
         dataconnection: [databaseConnectionString]
       };
-      res.json(response);
+      res.status(200).json(response);
 
       // Close the database connection after the check
       connection.end();
@@ -84,23 +86,16 @@ app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.b
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
-
-
-  // connection.query('INSERT INTO `title_basics` (title_id, title_type, title_primaryTitle, title_originalTitle, title_isAdult, title_startYear, title_endYear, title_runtimeMinutes, title_genre, title_posterURL) VALUES ?', [rows], (error, results) => {    
 
   // Insert data into the 'titlebasics' table
   connection.query('INSERT INTO title_basics (title_id, title_type, title_primaryTitle, title_originalTitle, title_isAdult, title_startYear, title_endYear, title_runtimeMinutes, title_genre, title_posterURL) VALUES ? ON DUPLICATE KEY UPDATE title_id = VALUES(title_id), title_type = VALUES(title_type), title_primaryTitle = VALUES(title_primaryTitle), title_originalTitle = VALUES(title_originalTitle), title_isAdult = VALUES(title_isAdult), title_startYear = VALUES(title_startYear), title_endYear = VALUES(title_endYear), title_runtimeMinutes = VALUES(title_runtimeMinutes), title_genre = VALUES(title_genre), title_posterURL = VALUES(title_posterURL)', [rows], (error, results) => {    
@@ -110,13 +105,13 @@ app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.b
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
     }
 
 
@@ -135,38 +130,32 @@ app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.aka
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
-
-  // console.log(rows);
 
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  // console.log(rows);
   // Insert data into the 'titleakas' table
   connection.query('INSERT INTO title_AKAs (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), AKA_ordering = VALUES(AKA_ordering), AKA_title = VALUES(AKA_title), AKA_region = VALUES(AKA_region), AKA_language = VALUES(AKA_language), AKA_types = VALUES(AKA_types), AKA_attributes = VALUES(AKA_attributes), AKA_isOriginal = VALUES(AKA_isOriginal)', [rows], (error, results) => {    
-  // connection.query('INSERT INTO title_akas (title_title_id, AKA_ordering, AKA_title, AKA_region, AKA_language, AKA_types, AKA_attributes, AKA_isOriginal) VALUES ?', [rows], (error, results) => {    
     if (error) {
       const response = {
         status: 'failed',
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
     }
 
 
@@ -184,22 +173,17 @@ app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.bas
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
-
-  // console.log(rows);
 
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  // console.log(rows);
   // Insert data into the 'principal' table
   connection.query(`
   INSERT INTO principal (
@@ -227,13 +211,13 @@ app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.bas
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
     }
 
 
@@ -251,22 +235,16 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
-
-  // console.log(rows);
 
   connection.query('SET FOREIGN_KEY_CHECKS=0;')
   connection.query('INSERT INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
@@ -276,14 +254,15 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      connection.query('SET FOREIGN_KEY_CHECKS=1;');
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      connection.query('SET FOREIGN_KEY_CHECKS=1;')
-      res.json(response);
+      connection.query('SET FOREIGN_KEY_CHECKS=1;');
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -301,22 +280,16 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
   
-  // console.log(rows);
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
-
-  // console.log(rows);
 
   connection.query('SET FOREIGN_KEY_CHECKS=0;');
   connection.query('INSERT INTO title_episode (title_episode_id, title_series_id, title_season_NO, title_episode_NO) VALUES ? ON DUPLICATE KEY UPDATE title_episode_id = VALUES(title_episode_id), title_series_id = VALUES(title_series_id), title_season_NO = VALUES(title_season_NO), title_episode_NO = VALUES(title_episode_NO)', [rows], (error, results) => {    
@@ -326,14 +299,15 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      connection.query('SET FOREIGN_KEY_CHECKS=1;');
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
       connection.query('SET FOREIGN_KEY_CHECKS=1;');
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -351,22 +325,16 @@ app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_tit
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
-
-  // console.log(rows);
   
   connection.query('INSERT INTO title_principals (title_title_id, principal_ordering, principal_principal_id, principal_category, principal_job, principal_character, principal_poster) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_ordering = VALUES(principal_ordering), principal_principal_id = VALUES(principal_principal_id), principal_category = VALUES(principal_category), principal_job = VALUES(principal_job), principal_character = VALUES(principal_character), principal_poster = VALUES(principal_poster)', [rows], (error, results) => {
     if (error) {
@@ -375,13 +343,13 @@ app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_tit
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -399,22 +367,16 @@ app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.
       status: 'failed',
       message: 'No file uploaded'
     };
-    return res.json(response);
+    res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
 
   const filePath = fileData.path; 
-
-  // const rawData = require('fs').readFileSync(filePath, 'utf-8');
   const rawData = fileData.buffer.toString('utf-8');
   const rows = rawData.split('\n').map(row => row.split('\t'));
 
-  // console.log(rows);
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
-
-  // console.log(rows);
   
   connection.query('INSERT INTO title_ratings (title_title_id, rating_avg, rating_numVotes) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), rating_avg = VALUES(rating_avg), rating_numVotes = VALUES(rating_numVotes)', [rows], (error, results) => {
     if (error) {
@@ -423,13 +385,13 @@ app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.
         message: 'Database insertion failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
 
@@ -494,7 +456,7 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
       titleObject.principals = principalsResult;
 
       // Return the titleObject
-      res.json({ titleObject });
+      res.status(200).json({ titleObject });
   } catch (error) {
       console.error('Database error:', error);
       res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -527,13 +489,13 @@ app.get(`${baseURL}/searchtitle`, (req, res) => {
         message: 'Database query failed',
         error: error.message
       };
-      res.json(response);
+      res.status(500).json(response); // Internal Server Error: Database insertion failed
     } else {
       const response = {
         status: 'success',
         data: results // Send the found titles back
       };
-      res.json(response);
+      res.status(200).json(response); // Success: Data uploaded successfully
     }
 
     // Close the database connection after the query
@@ -586,7 +548,7 @@ app.get(`${baseURL}/bygenre`, async (req, res) => {
       });
 
       // Return the results
-      res.json(formattedResults);
+      res.status(200).json(formattedResults);
 
       // Close the database connection
       connection.end();
@@ -636,7 +598,7 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
       nameObject.nameTitles = titlesResult;
 
       // Return the nameObject
-      res.json({ nameObject });
+      res.status(200).json({ nameObject });
   } catch (error) {
       console.error('Database error:', error);
       res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -688,7 +650,7 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
       nameObjectList.push(nameObject);
     }    
 
-    res.json({ nameObjectList });
+    res.status(200).json({ nameObjectList });
 
   } catch (error) {
     console.error('Database error:', error);
@@ -719,7 +681,7 @@ app.post(`${baseURL}/admin/resetall`, async (req, res) => {
       status: 'OK',
     };
 
-    res.json(response);
+    res.status(200).json(response);
   } catch (error) {
     // If an error occurs during the reset operation
     const response = {
