@@ -39,3 +39,7 @@ Remaining:
 # Update 3:
 
 - GET/bygenre is now also implemented and working (some tests are needed tho :D )
+
+# Update 4:
+
+Fixed Scope Names and Parameters for all endpoints (probably)

@@ -340,7 +340,7 @@ yargs
     },
   })
   .command({
-    command: 'get_title',
+    command: 'title',
     describe: 'Get details from title with the given ID',
     builder: (yargs) => {
       return yargs.option('titleID', {
@@ -373,14 +373,14 @@ yargs
     command: 'searchtitle',
     describe: 'Get title that contains the search word',
     builder: (yargs) => {
-      return yargs.option('titlePart', {
+      return yargs.option('titlepart', {
         describe: 'Keyword for title search',
         type: 'string',
         demandOption: true,
       });
     },
     handler: async (argv) => {
-      const titlePart = argv.titlePart;
+      const titlePart = argv.titlepart;
 
       try {
         // Create the data object to be sent in the request body
@@ -442,25 +442,25 @@ yargs
     describe: 'Get titles that match given genre and minimum rating',
     builder: (yargs) => {
       return yargs.option(
-        'qgenre', {
+        'genre', {
         describe: 'Genre for title search',
         type: 'string',
         demandOption: true,
       })
       .option(
-      'minrating', {
+      'min', {
       describe: 'Minimum rating for movie search',
       type: 'string',
       demandOption: true
       })
       .option(
-        'yrFrom',{
+        'from',{
         describe: 'Optional minimum airing year',
         type: 'int',
         demandOption: false
         })
       .option(
-        'yrTo', {
+        'to', {
           describe: 'Optional maximum airing end year',
           type: 'int',
           demandOption: false
@@ -468,10 +468,10 @@ yargs
       );
     },
     handler: async (argv) => {
-      const qgenre = argv.qgenre;
-      const minrating = argv.minrating;
-      const yrFrom = argv.yrFrom;
-      const yrTo = argv.yrTo;
+      const qgenre = argv.genre;
+      const minrating = argv.min;
+      const yrFrom = argv.from;
+      const yrTo = argv.to;
 
       try {
         // Create the data object to be sent in the request body
@@ -532,17 +532,17 @@ yargs
     },
   })
   .command({
-    command: 'get_name',
+    command: 'name',
     describe: 'Get details for actor with the given ID',
     builder: (yargs) => {
-      return yargs.option('nameID', {
+      return yargs.option('nameid', {
         describe: 'name ID',
         type: 'string',
         demandOption: true,
       });
     },
     handler: async (argv) => {
-      const nameID = argv.nameID;
+      const nameID = argv.nameid;
 
       try {
         // Make the corresponding REST API call for nameID
@@ -565,14 +565,14 @@ yargs
     command: 'searchname',
     describe: 'Get name that contains the search word',
     builder: (yargs) => {
-      return yargs.option('namePart', {
+      return yargs.option('name', {
         describe: 'Keyword for name search',
         type: 'string',
         demandOption: true,
       });
     },
     handler: async (argv) => {
-      const namePart = argv.namePart;
+      const namePart = argv.name;
 
       try {
         // Create the data object to be sent in the request body
