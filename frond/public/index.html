@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -89,7 +89,7 @@ listItem.innerHTML = `
     ${movie.title_startYear ? 'Start Year: ' + movie.title_startYear : ''} - 
     ${movie.title_endYear ? 'End Year: ' + movie.title_endYear : 'Present'} - <br>
     ${movie.title_runtimeMinutes ? 'Runtime: ' + movie.title_runtimeMinutes + ' mins' : ''} - <br>
-    <em>Poster:</em> <img src="${movie.title_posterURL}" alt="Movie Poster" style="max-height: 100px;"> - <br>
+    <em>Poster:</em> <img src="${getPosterUrl(movie.title_posterURL, `w92`)}" alt="Movie Poster" style="max-height: 100px;"> - <br>
     <em>Average Rating:</em> ${movie.avRating !== undefined ? 'Rating: ' + movie.avRating.toFixed(1) : 'Rating: Not available'} - <br>
     <em>Number of Votes:</em> ${movie.nVotes !== undefined ? 'Votes: ' + movie.nVotes : 'Votes: Not available'} <br><br>
 `;
@@ -144,7 +144,7 @@ listItem.innerHTML = `
                         Birth Year: ${name.birthYr || 'N/A'} - <br>
                         Death Year: ${name.deathYr || 'Present'} - <br>
                         Profession: ${name.profession || 'N/A'} - <br>
-                        <em>Poster:</em> <img src="${name.namePoster || 'placeholder-image-url'}" alt="Name Poster" style="max-height: 100px;"> <br><br>
+                        <em>Poster:</em> <img src="${getPosterUrl(name.namePoster, `w92`)}" alt="Name Poster" style="max-height: 100px;"> <br><br>
                     `;
                     resultList.appendChild(listItem);
                 });
@@ -155,6 +155,13 @@ listItem.innerHTML = `
             }
         }
 
+        // Function to replace width variable in poster URL
+        function getPosterUrl(url, width) {
+            if (url) {
+                return url.replace('{width_variable}', width);
+            }
+            return '';
+        }
          
     </script>
     
