@@ -36,23 +36,36 @@
     <div id="resultContainer"></div>
 
     <script>
-        async function searchMovies() {
-            const searchInput = document.getElementById('searchInput').value;
+   async function searchMovies() {
+    const searchInput = document.getElementById('searchInput').value;
 
-            if (!searchInput) {
-                alert('Please enter a movie title.');
-                return;
-            }
+    if (!searchInput) {
+        alert('Please enter a movie title.');
+        return;
+    }
 
-            try {
-                const response = await fetch(`/energy/api/searchtitle?titlePart=${searchInput}`);
-                const data = await response.json();
+    try {
+        const cleanedSearchInput = encodeURIComponent(searchInput);
+        const response = await fetch(`/energy/api/searchtitle?titlePart=${cleanedSearchInput}`);
+        const data = await response.json();
 
-                displayResults(data);
-            } catch (error) {
-                console.error('Error fetching data:', error);
-            }
+        console.log('Response from /energy/api/searchtitle:', data);  // Log the data received
+
+        if (data.status === 'success' && data.data.length > 0) {
+            // Display movie results
+            displayResults(data);
+            console.log('Movies found:', data.data);
+        } else {
+            // If no matching movies are found, trigger a search for names
+            console.log('No matching movies found. Triggering searchNames...');
+            await searchNames();  // Ensure searchNames is awaited before proceeding
         }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
 
         function displayResults(data) {
             const resultContainer = document.getElementById('resultContainer');
@@ -89,49 +102,60 @@ listItem.innerHTML = `
             }
         }
 
-
         async function searchNames() {
-  const searchInput = document.getElementById('searchInput').value;
+    const searchInput = document.getElementById('searchInput').value;
 
-  if (!searchInput) {
-    alert('Please enter a name.');
-    return;
-  }
+    if (!searchInput) {
+        alert('Please enter a name.');
+        return;
+    }
 
-  try {
-    const response = await fetch(`/your-base-url/searchname?namePart=${searchInput}`);
-    const data = await response.json();
+    try {
+        const apiUrl = `/energy/api/searchname?namePart=${searchInput}`;
+        console.log('Fetching data from:', apiUrl);  // Log the URL being used
 
-    displayResultss(data);
-  } catch (error) {
-    console.error('Error fetching data:', error);
-  }
-}
-function displayResultss(data) {
-  const resultContainer = document.getElementById('resultContainer');
-  resultContainer.innerHTML = '';
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            console.error('Error:', response.statusText);
+            return;
+        }
 
-  if (data.length > 0) {
-    const resultList = document.createElement('ul');
+        const data = await response.json();
+        console.log('Data received:', data);  // Log the data received
 
-    data.forEach(name => {
-      const listItem = document.createElement('li');
-      listItem.innerHTML = `
-        <strong>${name.name}</strong> - <br>
-        Birth Year: ${name.birthYr || 'N/A'} - <br>
-        Death Year: ${name.deathYr || 'Present'} - <br>
-        Profession: ${name.profession || 'N/A'} - <br>
-        <em>Poster:</em> <img src="${name.namePoster || 'placeholder-image-url'}" alt="Name Poster" style="max-height: 100px;"> <br><br>
-      `;
-      resultList.appendChild(listItem);
-    });
-
-    resultContainer.appendChild(resultList);
-  } else {
-    resultContainer.textContent = 'No matching names found.';
-  }
+        displayResultss(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 }
 
+
+        function displayResultss(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+
+            if (data.length > 0) {
+                const resultList = document.createElement('ul');
+
+                data.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${name.name}</strong> - <br>
+                        Birth Year: ${name.birthYr || 'N/A'} - <br>
+                        Death Year: ${name.deathYr || 'Present'} - <br>
+                        Profession: ${name.profession || 'N/A'} - <br>
+                        <em>Poster:</em> <img src="${name.namePoster || 'placeholder-image-url'}" alt="Name Poster" style="max-height: 100px;"> <br><br>
+                    `;
+                    resultList.appendChild(listItem);
+                });
+
+                resultContainer.appendChild(resultList);
+            } else {
+                resultContainer.textContent = 'No matching names found.';
+            }
+        }
+
+         
     </script>
     
     
