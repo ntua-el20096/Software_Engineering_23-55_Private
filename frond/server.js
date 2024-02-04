@@ -1,4 +1,4 @@
-//what does this code do? Connecting to the server which listens 
+ //what does this code do? Connecting to the server which listens 
 //on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
 //3,5,6 endpoints don't work because of the foreign keys? or not idk
@@ -10,6 +10,7 @@ const https = require('https');
 const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
+const bodyParser = require('body-parser');
  
 const httpsOptions = {
   key: fs.readFileSync('server.key', 'utf8'),
@@ -31,7 +32,16 @@ const databaseConfig = {
     port: 3307
 
 };
+app.use(bodyParser.json());
 
+app.post('/api/data', (req, res) => {
+  const frontendData = req.body;
+  // Process the data on the server as needed
+  console.log('Received data from front-end:', frontendData);
+
+  // Send a response back to the front-end
+  res.json({ message: 'Data received on the server!' });
+});
 const databaseConnectionString = JSON.stringify(databaseConfig);
 
 const upload = multer();
@@ -67,14 +77,14 @@ app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
         status: 'failed',
         dataconnection: [databaseConnectionString]
       };
-      res.status(404).json(response);
+      res.json(response);
     } else {
       // Build the response JSON object for success
       const response = {
         status: 'OK',
         dataconnection: [databaseConnectionString]
       };
-      res.status(200).json(response);
+      res.json(response);
 
       // Close the database connection after the check
       connection.end();
@@ -490,19 +500,74 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
   }
 });
 
+// Define an endpoint handler for /searchword
+app.get(`${baseURL}/searchword/:wordID`, async (req, res) => {
+  const wordID = req.params.wordID;
+
+  if (!wordID) {
+    return res.status(400).json({ status: 'failed', message: 'wordID is required' });
+  }
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+    let query;
+    let queryParams;
+
+    // Check if the wordID starts with "nm" (name) or "tt" (title)
+    if (wordID.startsWith('nm')) {
+      query = `SELECT * FROM principal WHERE principal_id = ?`;
+      queryParams = [wordID];
+    } else if (wordID.startsWith('tt')) {
+      query = `SELECT * FROM title_basics WHERE title_id = ?`;
+      queryParams = [wordID];
+    } else {
+      return res.status(400).json({ status: 'failed', message: 'Invalid wordID format' });
+    }
+
+    // Execute the query
+    const [results] = await connection.promise().query(query, queryParams);
+
+    // Return the results
+    res.status(200).json({ status: 'success', data: results });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ status: 'failed', message: 'Internal server error', error: error.message });
+  } finally {
+    // Close the database connection
+    connection.end();
+  }
+});
 
 
 // Define an endpoint handler for /searchtitle
+// Define an endpoint handler for /searchtitle
 app.get(`${baseURL}/searchtitle`, (req, res) => {
-  const titlePart = req.body.titlePart; // Extract titlePart from request body
+  const titlePart = req.query.titlePart;
 
   if (!titlePart) {
     return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
   }
 
-  const query = `SELECT * FROM title_basics WHERE title_originalTitle LIKE ?`;
-  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
+  const query = `
+        SELECT 
+            tb.title_type,
+            tb.title_primaryTitle,
+            tb.title_originalTitle,
+            tb.title_isAdult,
+            tb.title_startYear,
+            tb.title_endYear,
+            tb.title_runtimeMinutes,
+            tb.title_posterURL,
+            tr.rating_avg AS avRating,
+            tr.rating_numVotes AS nVotes
+        FROM title_basics tb
+        LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+        WHERE tb.title_originalTitle LIKE ?`;
 
+const likeTitlePart = `%${titlePart}%`;
+console.log('Search term:', likeTitlePart);
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
@@ -526,6 +591,7 @@ app.get(`${baseURL}/searchtitle`, (req, res) => {
     connection.end();
   });
 });
+
 
 app.get(`${baseURL}/bygenre`, async (req, res) => {
   const { qgenre, minrating, yrFrom, yrTo } = req.query;
@@ -609,7 +675,7 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
           return res.status(404).json({ message: 'Name not found' });
       }
 
-      const nameObject = nameResult[0];
+      const nameObject = nameResult[0];s
 
       // Fetch nameTitles
       const titlesQuery = `
@@ -640,43 +706,42 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
   const connection = mysql.createConnection(databaseConfig);
 
   try {
-      // Query to search for names that contain the namePart
-      const query = `
-          SELECT 
-              principal_id AS nameID, 
-              principal_name AS name, 
-              principal_imageURL AS namePoster, 
-              principal_birthYr AS birthYr, 
-              principal_deathYr AS deathYr, 
-              principal_profession AS profession
-          FROM principal
-          WHERE principal_name LIKE ?`;
+    // Query to search for names that contain the namePart
+    const query = `
+      SELECT 
+        principal_id AS nameID, 
+        principal_name AS name, 
+        principal_imageURL AS namePoster, 
+        principal_birthYr AS birthYr, 
+        principal_deathYr AS deathYr, 
+        principal_profession AS profession
+      FROM principal
+      WHERE principal_name LIKE ?`;
 
-      // Execute the query
-      const [results] = await connection.promise().query(query, [`%${namePart}%`]);
+    // Execute the query
+    const [results] = await connection.promise().query(query, [`%${namePart}%`]);
 
-      // Format the results as a list of nameObjects
-      const nameObjects = results.map(result => {
-          return {
-              nameID: result.nameID,
-              name: result.name,
-              namePoster: result.namePoster,
-              birthYr: result.birthYr,
-              deathYr: result.deathYr,
-              profession: result.profession,
-              // Add any additional fields here as needed
-          };
-      });
+    // Format the results as a list of nameObjects
+    const nameObjects = results.map(result => {
+      return {
+        nameID: result.nameID,
+        name: result.name,
+        namePoster: result.namePoster,
+        birthYr: result.birthYr,
+        deathYr: result.deathYr,
+        profession: result.profession,
+        // Add any additional fields here as needed
+      };
+    });
 
-      // Return the results
-      res.status(200).json(nameObjects);
-
+    // Return the results
+    res.status(200).json(nameObjects);
   } catch (error) {
-      console.error('Database error:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
-    } finally {
-      // Close the database connection
-      connection.end();
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+    // Close the database connection
+    connection.end();
   }
 });
 
