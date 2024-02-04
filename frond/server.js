@@ -1,4 +1,4 @@
- //what does this code do? Connecting to the server which listens 
+//what does this code do? Connecting to the server which listens 
 //on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
 //3,5,6 endpoints don't work because of the foreign keys? or not idk
@@ -543,12 +543,14 @@ app.get(`${baseURL}/searchword/:wordID`, async (req, res) => {
 
 // Define an endpoint handler for /searchtitle
 // Define an endpoint handler for /searchtitle
-app.get(`${baseURL}/searchtitle`, (req, res) => {
+app.get(`${baseURL}/searchtitle`, async (req, res) => {
   const titlePart = req.query.titlePart;
 
   if (!titlePart) {
     return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
   }
+
+  const decodedTitlePart = decodeURIComponent(titlePart);
 
   const query = `
         SELECT 
@@ -566,9 +568,8 @@ app.get(`${baseURL}/searchtitle`, (req, res) => {
         LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
         WHERE tb.title_originalTitle LIKE ?`;
 
-const likeTitlePart = `%${titlePart}%`;
-console.log('Search term:', likeTitlePart);
-  // Establish a connection to the database
+  const likeTitlePart = `%${decodedTitlePart}%`;
+
   const connection = mysql.createConnection(databaseConfig);
 
   connection.query(query, [likeTitlePart], (error, results) => {
@@ -582,7 +583,7 @@ console.log('Search term:', likeTitlePart);
     } else {
       const response = {
         status: 'success',
-        data: results // Send the found titles back
+        data: results
       };
       res.json(response);
     }
@@ -591,6 +592,7 @@ console.log('Search term:', likeTitlePart);
     connection.end();
   });
 });
+
 
 
 app.get(`${baseURL}/bygenre`, async (req, res) => {
