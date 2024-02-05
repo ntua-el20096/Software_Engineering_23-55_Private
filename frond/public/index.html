@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #searchInput {
+            padding: 10px;
+            width: 300px;
+        }
+
+        #searchButton {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #resultContainer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Search</h1>
+
+    <label for="searchInput">Search by title:</label>
+    <input type="text" id="searchInput" placeholder="Enter movie title">
+
+    <button id="searchButton" onclick="searchMovies()">Search</button>
+
+    <div id="resultContainer"></div>
+
+    <script>
+        async function searchMovies() {
+    const searchInput = document.getElementById('searchInput').value;
+
+    if (!searchInput) {
+        alert('Please enter a movie title.');
+        return;
+    }
+
+    try {
+        const cleanedSearchInput = encodeURIComponent(searchInput);
+
+        const genreSearchUrl = `/energy/api/bygenre?qgenre=${genre}&minrating=${minrating}&yrFrom=${yrFrom}&yrTo=${yrTo}`;
+const [titleResponse, nameResponse, genreResponse] = await Promise.all([
+    fetch(`/energy/api/searchtitle?titlePart=${cleanedSearchInput}`),
+    fetch(`/energy/api/searchname?namePart=${cleanedSearchInput}`),
+    fetch(genreSearchUrl)
+]);
+
+
+        const titleData = await titleResponse.json();
+        const nameData = await nameResponse.json();
+        const genreData = await genreResponse.json();
+
+        console.log('Response from /energy/api/searchtitle:', titleData);
+        console.log('Response from /energy/api/searchname:', nameData);
+        console.log('Response from /energy/api/bygenre:', genreData);
+
+        displayResults(titleData, nameData, genreData);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+function displayResults(titleData, nameData, genreData) {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+
+            if (titleData.status === 'success' && titleData.data.length > 0) {
+                const titleList = document.createElement('ul');
+
+                titleData.data.forEach(movie => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${movie.title_type}</strong> - <br>
+                        ${movie.title_primaryTitle} - <br>
+                        ${movie.title_originalTitle} - <br>
+                        ${movie.title_isAdult ? 'For Adults' : 'For All Ages'} - <br>
+                        ${movie.title_startYear ? 'Start Year: ' + movie.title_startYear : ''} - 
+                        ${movie.title_endYear ? 'End Year: ' + movie.title_endYear : 'Present'} - <br>
+                        ${movie.title_runtimeMinutes ? 'Runtime: ' + movie.title_runtimeMinutes + ' mins' : ''} - <br>
+                        
+                        <em>Poster:</em> <img src="${getPosterUrl(movie.title_posterURL, `w92`)}" alt="Movie Poster" style="max-height: 100px;"> - <br>
+                        <em>Average Rating:</em> ${movie.avRating !== undefined ? 'Rating: ' + movie.avRating.toFixed(1) : 'Rating: Not available'} - <br>
+                        <em>Number of Votes:</em> ${movie.nVotes !== undefined ? 'Votes: ' + movie.nVotes : 'Votes: Not available'} <br><br>
+                    `;
+                    titleList.appendChild(listItem);
+                });
+
+                resultContainer.appendChild(titleList);
+            } else {
+                resultContainer.textContent = 'No matching movies found.';
+            }
+
+            if (nameData.length > 0) {
+                const nameList = document.createElement('ul');
+
+                nameData.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${name.name}</strong> - <br>
+                        Birth Year: ${name.birthYr || 'N/A'} - <br>
+                        Death Year: ${name.deathYr || 'Present'} - <br>
+                        Profession: ${name.profession || 'N/A'} - <br>
+                        <em>Poster:</em> <img src="${getPosterUrl(name.namePoster, `w92`)}" alt="Name Poster" style="max-height: 100px;"> <br><br>
+                    `;
+                    nameList.appendChild(listItem);
+                });
+
+                resultContainer.appendChild(nameList);
+            } else {
+                if (titleData.status !== 'success' || titleData.data.length === 0) {
+                    resultContainer.textContent = 'No matching movies or names found.';
+                }
+            }
+            if (genreData.status === 'success' && genreData.length > 0) {
+        const genreList = document.createElement('ul');
+
+        genreData.forEach(genreResult => {
+            const listItem = document.createElement('li');
+            listItem.innerHTML = `
+                <strong>${genreResult.type}</strong> - <br>
+                ${genreResult.originalTitle} - <br>
+                ${genreResult.titlePoster} - <br>
+                ${genreResult.startYear ? 'Start Year: ' + genreResult.startYear : ''} - 
+                ${genreResult.endYear ? 'End Year: ' + genreResult.endYear : 'Present'} - <br>
+                ${genreResult.genres.map(genre => `Genre: ${genre.genreTitle}`).join(', ')} - <br>
+                <em>Poster:</em> <img src="${getPosterUrl(genreResult.titlePoster, `w92`)}" alt="Genre Poster" style="max-height: 100px;"> - <br>
+                <em>Average Rating:</em> ${genreResult.avRating !== undefined ? 'Rating: ' + genreResult.avRating.toFixed(1) : 'Rating: Not available'} <br><br>
+            `;
+            genreList.appendChild(listItem);
+        });
+
+        resultContainer.appendChild(genreList);
+    } else {
+        if (titleData.status !== 'success' || titleData.data.length === 0) {
+            resultContainer.textContent = 'No matching movies, names, or genres found.';
+        }
+    }
+        }
+        function getPosterUrl(url, width) {
+            if (url) {
+                return url.replace('{width_variable}', width);
+            }
+            return '';
+        }
+    </script>
+</body>
+</html>
