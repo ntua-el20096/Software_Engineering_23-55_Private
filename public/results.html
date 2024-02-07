@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -6,17 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Search Results</title>
     <style>
+        body {
+            background-color: #f0f0f0; /* Replace with your desired color code */
+        }
+    
         .resultBox {
             border: 1px solid #ccc;
             padding: 10px;
             margin-bottom: 10px;
         }
-
+    
         #resultsContainer {
             display: flex;
             justify-content: space-between;
         }
-
+    
         #nameResults {
             margin-left: 20px;
         }
@@ -42,9 +46,11 @@
     <script>
         // Function to parse query parameters from the URL
         function goToTitleDetails(movie) {
-    const queryString = `?title=${encodeURIComponent(movie.title_primaryTitle)}&category=${encodeURIComponent(movie.title_type)}&releaseYear=${encodeURIComponent(movie.title_startYear)}&rating=${encodeURIComponent(movie.avRating)}&votes=${encodeURIComponent(movie.nVotes)}`;
+    const queryString = `?title=${encodeURIComponent(movie.title_primaryTitle)}&category=${encodeURIComponent(movie.title_type)}&releaseYear=${encodeURIComponent(movie.title_startYear)}&rating=${encodeURIComponent(movie.avRating)}&votes=${encodeURIComponent(movie.nVotes)}&isAdult=${encodeURIComponent(movie.title_isAdult)}&runtimeMinutes=${encodeURIComponent(movie.title_runtimeMinutes)}&posterUrl=${encodeURIComponent(getPosterUrl(movie.title_posterURL, 'w92'))}`;
     window.location.href = `index_movie_details.html${queryString}`;
 }
+
+
 
 function goToNameDetails(name) {
     const queryString = `?name=${encodeURIComponent(name.name)}&birthYear=${encodeURIComponent(name.birthYr || 'N/A')}&deathYear=${encodeURIComponent(name.deathYr || 'Present')}&profession=${encodeURIComponent(name.profession || 'N/A')}&posterUrl=${encodeURIComponent(getPosterUrl(name.namePoster, 'w92'))}`;
