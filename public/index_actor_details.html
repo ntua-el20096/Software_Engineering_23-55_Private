@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="main.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
+    <link rel="icon" href="small_logo.png">
+    <title>John Lennon</title>
+    <!-- there goes the title of the movie -->
+</head>
+
+<body>
+    <header>
+        <div class="logo">
+            <img src="big_logo.png" alt="">
+            <h3>NTUA Flix</h3>
+        </div>
+        <div class="user">
+            <i class="fas fa-search"></i>
+        </div>  
+    </header>   
+
+    <!-- Hero section -->
+    <section>
+        <div class="heropage">
+            <div class="inside-heropage">
+                <h1 id="actorName"></h1>
+                <p id="profession"></p>
+                <p id="birthYear"></p>
+                <p id="deathYear"></p>
+            </div>
+        </div>
+        <div class="poster">
+            <img src="" alt="Actor Poster" id="posterImg">
+        </div>
+    </section>
+
+    <script>
+        // Function to parse query parameters from the URL
+        function getQueryParams() {
+            const queryParams = {};
+            const queryString = window.location.search.substring(1);
+            const params = queryString.split('&');
+
+            for (const param of params) {
+                const [key, value] = param.split('=');
+                queryParams[key] = decodeURIComponent(value);
+            }
+
+            return queryParams;
+        }
+
+        // Function to retrieve a specific query parameter
+        function getQueryParam(param) {
+            const queryParams = getQueryParams();
+            return queryParams[param] || 'N/A';
+        }
+
+         
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const name = getQueryParam('name');
+            const birthYear = getQueryParam('birthYear');
+            const deathYear = getQueryParam('deathYear');
+            const profession = getQueryParam('profession');
+            const posterUrl = getQueryParam('posterUrl');
+
+            document.getElementById('actorName').textContent = name;
+            document.getElementById('birthYear').textContent = `Birth Year: ${birthYear}`;
+            document.getElementById('deathYear').textContent = `Death Year: ${deathYear}`;
+            document.getElementById('profession').textContent = `Profession: ${profession}`;
+            document.getElementById('posterImg').src = posterUrl;
+        });
+    </script>
+</body>
+</html>

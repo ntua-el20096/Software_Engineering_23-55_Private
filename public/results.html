@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Results</title>
+    <style>
+        .resultBox {
+            border: 1px solid #ccc;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        #resultsContainer {
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #nameResults {
+            margin-left: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Search Results</h1>
+
+    <div id="resultsContainer">
+        <div id="titleResults" onclick="goToTitleDetails()">
+            <h2>Title Results</h2>
+            <div id="titleContainer"></div>
+        </div>
+
+        <div id="nameResults" onclick="goToNameDetails()">
+            <h2>Name Results</h2>
+            <div id="nameContainer"></div>
+        </div>
+    </div>
+
+     
+
+    <script>
+        // Function to parse query parameters from the URL
+        function goToTitleDetails(movie) {
+    const queryString = `?title=${encodeURIComponent(movie.title_primaryTitle)}&category=${encodeURIComponent(movie.title_type)}&releaseYear=${encodeURIComponent(movie.title_startYear)}&rating=${encodeURIComponent(movie.avRating)}&votes=${encodeURIComponent(movie.nVotes)}`;
+    window.location.href = `index_movie_details.html${queryString}`;
+}
+
+function goToNameDetails(name) {
+    const queryString = `?name=${encodeURIComponent(name.name)}&birthYear=${encodeURIComponent(name.birthYr || 'N/A')}&deathYear=${encodeURIComponent(name.deathYr || 'Present')}&profession=${encodeURIComponent(name.profession || 'N/A')}&posterUrl=${encodeURIComponent(getPosterUrl(name.namePoster, 'w92'))}`;
+    window.location.href = `index_actor_details.html${queryString}`;
+}
+
+        function getQueryParams() {
+            const queryParams = {};
+            const queryString = window.location.search.substring(1);
+            const params = queryString.split('&');
+
+            for (const param of params) {
+                const [key, value] = param.split('=');
+                queryParams[key] = decodeURIComponent(value);
+            }
+
+            return queryParams;
+        }
+
+        // Function to display search results
+        function displayResults() {
+    const queryParams = getQueryParams();
+    const titleData = JSON.parse(localStorage.getItem('titleData') || 'null');
+    const nameData = JSON.parse(localStorage.getItem('nameData') || 'null');
+    const titleContainer = document.getElementById('titleContainer');
+    const nameContainer = document.getElementById('nameContainer');
+
+    if (titleData) {
+        titleContainer.innerHTML = '';
+
+        if (titleData.status === 'success' && titleData.data.length > 0) {
+            titleData.data.forEach(movie => {
+                const content = `
+                    <strong>${movie.title_type}</strong> - <br>
+                    ${movie.title_primaryTitle} - <br>
+                    ${movie.title_originalTitle} - <br>
+                    ${movie.title_isAdult ? 'For Adults' : 'For All Ages'} - <br>
+                    ${movie.title_startYear ? 'Start Year: ' + movie.title_startYear : ''} - 
+                    ${movie.title_endYear ? 'End Year: ' + movie.title_endYear : 'Present'} - <br>
+                    ${movie.title_runtimeMinutes ? 'Runtime: ' + movie.title_runtimeMinutes + ' mins' : ''} - <br>
+                    <em>Poster:</em> <img src="${getPosterUrl(movie.title_posterURL, 'w92')}" alt="Movie Poster" style="max-height: 100px;"> - <br>
+                    <em>Average Rating:</em> ${movie.avRating !== undefined ? 'Rating: ' + movie.avRating.toFixed(1) : 'Rating: Not available'} - <br>
+                    <em>Number of Votes:</em> ${movie.nVotes !== undefined ? 'Votes: ' + movie.nVotes : 'Votes: Not available'} <br><br>
+                `;
+                appendResult(titleContainer, content, () => goToTitleDetails(movie));
+            });
+        } else {
+            titleContainer.innerHTML = 'No matching movies found.';
+        }
+    }
+
+    if (nameData) {
+        nameContainer.innerHTML = '';
+
+        if (nameData.length > 0) {
+            nameData.forEach(name => {
+                const content = `
+                    <strong>${name.name}</strong> - <br>
+                    Birth Year: ${name.birthYr || 'N/A'} - <br>
+                    Death Year: ${name.deathYr || 'Present'} - <br>
+                    Profession: ${name.profession || 'N/A'} - <br>
+                    <em>Poster:</em> <img src="${getPosterUrl(name.namePoster, 'w92')}" alt="Name Poster" style="max-height: 100px;"> <br><br>
+                `;
+                appendResult(nameContainer, content, () => goToNameDetails(name));
+            });
+        } else {
+            if (!titleData || (titleData.status !== 'success' || titleData.data.length === 0)) {
+                nameContainer.innerHTML = 'No matching names found.';
+            }
+        }
+    }
+}
+        function createResultBox(content, clickHandler) {
+        const resultBox = document.createElement('div');
+        resultBox.className = 'resultBox';
+        resultBox.innerHTML = content;
+        resultBox.addEventListener('click', clickHandler);
+        return resultBox;
+    }
+
+    function appendResult(container, content, clickHandler) {
+        const resultBox = createResultBox(content, clickHandler);
+        container.appendChild(resultBox);
+    }
+
+        // Function to display search results
+        
+        function getPosterUrl(url, width) {
+            if (url) {
+                return url.replace('{width_variable}', width);
+            }
+            return '';
+        }
+
+        // Call displayResults function when the page loads
+        window.onload = displayResults;
+            </script>
+</body>
+</html>
