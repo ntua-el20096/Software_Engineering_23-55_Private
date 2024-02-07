@@ -36,7 +36,7 @@
                 </div>
             </div>
             <div class="poster">
-                <img src="big_logo.png" alt="">
+                <img src="" alt="Movie Poster" id="posterImg">
         </div>
     </section>
 
@@ -69,12 +69,15 @@
             document.getElementById('movieReleaseYear').textContent = `Release Year: ${releaseYear}`;
             document.getElementById('movieRating').textContent = `Rating: ${rating}`;
             document.getElementById('movieVotes').textContent = `Votes: ${votes}`;
+      
+            const posterUrl = queryParams['posterUrl'] || ''; // Add this line
+    document.getElementById('posterImg').src = posterUrl; // Set the poster image source
 
-            const detailsContainer = document.querySelector('.inside-heropage');
-        detailsContainer.innerHTML += `
-            <p>For ${isAdult ? 'Adults' : 'All Ages'}</p>
-            <p>${runtimeMinutes ? 'Runtime: ' + runtimeMinutes + ' mins' : ''}</p>
-        `;
+    const detailsContainer = document.querySelector('.inside-heropage');
+    detailsContainer.innerHTML += `
+        <p>For ${isAdult ? 'Adults' : 'All Ages'}</p>
+        <p>${runtimeMinutes ? 'Runtime: ' + runtimeMinutes + ' mins' : ''}</p>
+    `;
         });
 
         function getQueryParams() {
@@ -92,3 +95,4 @@
     </script>
 </body>
 </html>
+
