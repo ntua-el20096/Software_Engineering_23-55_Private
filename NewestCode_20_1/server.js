@@ -1,3 +1,8 @@
+//what does this code do? Connecting to the server which listens 
+//on the "https://localhost:8765/" and it connects to the database and 
+//executes the endpoints 1-9, populating the db
+
+const path = require('path');
 const mysql = require('mysql2');
 const express = require('express');
 const https = require('https');
@@ -28,10 +33,10 @@ const databaseConnectionString = JSON.stringify(databaseConfig);
 const upload = multer();
 
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname,'public')));
 app.get('/', (req, res) => {
   // Assuming you want to serve the index.html file
-  res.sendFile(path.join('public', 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Multer configuration for handling file uploads
@@ -242,7 +247,8 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  connection.query('SET FOREIGN_KEY_CHECKS=0;')
+  connection.query('SET FOREIGN_KEY_CHECKS=0;');
+  
   connection.query('INSERT INTO title_crew (title_title_id, principal_directors_id, principal_writers_id) VALUES ? ON DUPLICATE KEY UPDATE title_title_id = VALUES(title_title_id), principal_directors_id = VALUES(principal_directors_id), principal_writers_id = VALUES(principal_writers_id)', [rows], (error, results) => {
     if (error) {
       const response = {
@@ -465,38 +471,63 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
 
 
 // Define an endpoint handler for /searchtitle
-app.get(`${baseURL}/searchtitle`, (req, res) => {
+app.get(`${baseURL}/searchtitle`, async (req, res) => {
   const titlePart = req.body.titlePart; // Extract titlePart from request body
 
   if (!titlePart) {
     return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
   }
 
-  const query = `SELECT * FROM title_basics WHERE title_originalTitle LIKE ?`;
-  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
-
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
-  connection.query(query, [likeTitlePart], (error, results) => {
-    if (error) {
-      const response = {
-        status: 'failed',
-        message: 'Database query failed',
-        error: error.message
-      };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
-    } else {
-      const response = {
-        status: 'success',
-        data: results // Send the found titles back
-      };
-      res.status(200).json(response); // Success: Data uploaded successfully
-    }
+  try {
+    const query = `SELECT tb.title_id AS titleID, 
+    tb.title_type AS type, 
+    tb.title_originalTitle AS originalTitle, 
+    tb.title_posterURL AS titlePoster, 
+    tb.title_startYear AS startYear, 
+    tb.title_endYear AS endYear, 
+    tb.title_genre AS genres,
+    tr.rating_avg AS avRating,
+    tr.rating_numVotes AS nVotes
+  FROM title_basics tb
+  LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id 
+  WHERE tb.title_originalTitle LIKE ?`;
+  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
 
-    // Close the database connection after the query
+  const [titleResult] = await connection.promise().query(query,likeTitlePart);
+  var titleObjectList = [];
+  for (var i = 0; i < titleResult.length; i++) {
+    var titleObject = titleResult[i];
+    titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+    const akasQuery = `SELECT aka_title AS akaTitle, AKA_region AS regionAbbrev FROM title_AKAs WHERE title_title_id = ?`;
+    const [akasResult] = await connection.promise().query(akasQuery, [titleObject.titleID]);
+    titleObject.titleAkas = akasResult;
+    const principalsQuery = `
+      SELECT 
+          np.principal_id AS nameID, 
+          np.principal_name AS name, 
+          tp.principal_category AS category
+      FROM title_principals tp
+      JOIN principal np ON tp.principal_principal_id = np.principal_id
+      INNER JOIN title_basics tb ON tp.title_title_id = tb.title_id
+      WHERE tb.title_id = ?`;
+  const [principalsResult] = await connection.promise().query(principalsQuery, [titleObject.titleID]);
+  titleObject.principals = principalsResult;
+  titleObjectList.push(titleObject);
+  }
+  
+  res.status(200).json({titleObjectList}); // Success: Data uploaded successfully
+  }
+  catch {
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+  finally {
     connection.end();
-  });
+  }
+
 });
 
 app.get(`${baseURL}/bygenre`, async (req, res) => {
@@ -536,18 +567,34 @@ app.get(`${baseURL}/bygenre`, async (req, res) => {
 
       // Execute the query
       const [results] = await connection.promise().query(query, queryParams);
+  var titleObjectList = [];
+  for (var i = 0; i < results.length; i++) {
+    var titleObject = results[i];
+    titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+    let akasQuery = `SELECT 
+      aka_title AS akaTitle,
+      AKA_region AS regionAbbrev 
+      FROM title_AKAs 
+      WHERE title_title_id = ?`;
+    const [akasResult] = await connection.promise().query(akasQuery, [titleObject.titleID]);
+    titleObject.titleAkas = akasResult;
+    let principalsQuery = `
+      SELECT 
+          np.principal_id AS nameID, 
+          np.principal_name AS name, 
+          tp.principal_category AS category
+      FROM title_principals tp
+      JOIN principal np ON tp.principal_principal_id = np.principal_id
+      WHERE tp.title_title_id = ?`;
+  const [principalsResult] = await connection.promise().query(principalsQuery, [titleObject.titleID]);
+  titleObject.principals = principalsResult;
+  titleObjectList.push(titleObject);
+  }
+    // Return the results
+    res.status(200).json({titleObjectList});
 
-      // Format the results
-      const formattedResults = results.map(result => {
-          result.genres = result.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
-          return result;
-      });
-
-      // Return the results
-      res.status(200).json(formattedResults);
-
-      // Close the database connection
-      connection.end();
+    // Close the database connection
+    connection.end();
   } catch (error) {
       console.error('Database error:', error);
       res.status(500).json({ message: 'Internal server error', error: error.message });
@@ -698,3 +745,4 @@ const httpsServer = https.createServer({
 httpsServer.listen(port, () => {
   console.log(`Server running on port ${port}`);
 });
+
