@@ -9,6 +9,35 @@
     <link rel="icon" href="small_logo.png">
     <title>MOVIE</title>
     <!-- there goes the title of the movie -->
+
+
+    <style>
+      .slatest-movies {
+            position: relative; /* Position relative for absolute arrow placement */
+            overflow-x: auto; /* Enable horizontal scrolling */
+        }
+
+        .scroll-arrow {
+            position: absolute; /* Position absolute for arrow */
+            top: 50%; /* Center vertically */
+            transform: translateY(-50%); /* Adjust for vertical centering */
+            right: 10px; /* Adjust the right distance from the container */
+            font-size: 24px; /* Adjust the arrow icon size */
+            color: #fff; /* Arrow color */
+            cursor: pointer; /* Change cursor on hover */
+        }
+
+        .slatest-container {
+            display: flex; /* Use flexbox to enable horizontal layout */
+            gap: 15px; /* Adjust the gap between each slatest movie */
+            white-space: nowrap; /* Prevent wrapping to the next line */
+        }
+
+        .slatest-inside {
+            flex: 0 0 auto; /* Do not allow items to grow or shrink, fixed size */
+            width: 200px; /* Set a fixed width for each slatest movie element */
+        }
+    </style>
 </head>
 
 <body>
@@ -26,73 +55,40 @@
     <section>
         <section>
             <div class="heropage">
-                <div class="inside-heropage" style="margin-top: -70px;">
+                <div class="inside-heropage" style="margin-top: -150px;">
                     <h1 id="movieTitle"></h1>
                     <p id="movieCategory"></p>
                     <p id="movieReleaseYear"></p>
                     <p id="movieRating"></p>
                     <p id="movieVotes"></p>
+                    <p id="movieGenres"></p>
+                <!-- Display titleAkas -->
+                <p id="movieTitleAkas"></p>
+                <!-- Display principals -->
+                <div id="moviePrincipals"></div>
                     
                 </div>
             </div>
             <div class="poster">
-                <img src="" alt="Movie Poster" id="posterImg">
-        </div>
+                <img src="" alt="Poster Image" onerror="this.src='big_logo.png'" style="max-height: 500px;" id="posterImg">
+            </div>
     </section>
 
     <div class="slatest-movies">
         <h1>Cast & Crew</h1>
-        <div class="slatest-container" id="slatestContainer">
-        </div>
+        <div class="slatest-container" id="slatestContainer"></div>
     </div>
-    <script src="slatestMovies.js"></script>
+    <div class="slatest-movies">
+        <i class="fas fa-arrow-right scroll-arrow" onclick="scrollRight()"></i>
+        <div class="slatest-container" id="slatestContainer"></div>
+    </div>
+    <script src="castandcrew.js"></script>
 
     <!-- Goto button -->
     <div class="scroll">
         <a href=""><i class="fas fa-arrow-up"></i></a>
     </div>
      
-    <!-- Script for handling query parameters and setting values -->
-    <script>
-        document.addEventListener('DOMContentLoaded', function () {
-            const queryParams = getQueryParams();
-            const title = queryParams['title'] || '';
-            const category = queryParams['category'] || '';
-            const releaseYear = queryParams['releaseYear'] || '';
-            const rating = queryParams['rating'] || '';
-            const votes = queryParams['votes'] || '';
-            const isAdult = queryParams['isAdult'] || ''; // Add this line
-    const runtimeMinutes = queryParams['runtimeMinutes'] || ''; // Add this line
-
-            document.getElementById('movieTitle').textContent = title;
-            document.getElementById('movieCategory').textContent = `Category: ${category}`;
-            document.getElementById('movieReleaseYear').textContent = `Release Year: ${releaseYear}`;
-            document.getElementById('movieRating').textContent = `Rating: ${rating}`;
-            document.getElementById('movieVotes').textContent = `Votes: ${votes}`;
-      
-            const posterUrl = queryParams['posterUrl'] || ''; // Add this line
-    document.getElementById('posterImg').src = posterUrl; // Set the poster image source
-
-    const detailsContainer = document.querySelector('.inside-heropage');
-    detailsContainer.innerHTML += `
-        <p>For ${isAdult ? 'Adults' : 'All Ages'}</p>
-        <p>${runtimeMinutes ? 'Runtime: ' + runtimeMinutes + ' mins' : ''}</p>
-    `;
-        });
-
-        function getQueryParams() {
-        const queryParams = {};
-        const queryString = window.location.search.substring(1);
-        const params = queryString.split('&');
-
-        for (const param of params) {
-            const [key, value] = param.split('=');
-            queryParams[key] = decodeURIComponent(value);
-        }
-
-        return queryParams;
-    }
-    </script>
+    <script src="movie.js"></script>
 </body>
 </html>
-

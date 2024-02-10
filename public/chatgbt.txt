@@ -1,0 +1,287 @@
+user:
+index_search.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Movie Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+
+        #searchInput {
+            padding: 10px;
+            width: 300px;
+        }
+
+        #searchButton {
+            padding: 10px;
+            cursor: pointer;
+        }
+
+        #resultContainer {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Movie Search</h1>
+
+    <label for="searchInput">Search by title:</label>
+    <input type="text" id="searchInput" placeholder="Enter movie title">
+
+    <button id="searchButton" onclick="searchMovies()">Search</button>
+
+    <div id="resultContainer"></div>
+
+    <script>
+   async function searchMovies() {
+    const searchInput = document.getElementById('searchInput').value;
+
+    if (!searchInput) {
+        alert('Please enter a movie title.');
+        return;
+    }
+
+    try {
+        const cleanedSearchInput = encodeURIComponent(searchInput);
+        const response = await fetch(`/energy/api/searchtitle?titlePart=${cleanedSearchInput}`);
+        const data = await response.json();
+
+        console.log('Response from /energy/api/searchtitle:', data);  // Log the data received
+
+        if (data.status === 'success' && data.data.length > 0) {
+            // Display movie results
+            displayResults(data);
+            console.log('Movies found:', data.data);
+        } else {
+            // If no matching movies are found, trigger a search for names
+            console.log('No matching movies found. Triggering searchNames...');
+            await searchNames();  // Ensure searchNames is awaited before proceeding
+        }
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+
+        function displayResults(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+
+            if (data.status === 'success' && data.data.length > 0) {
+                const resultList = document.createElement('ul');
+
+                data.data.forEach(movie => {
+                    const listItem = document.createElement('li');
+                    // Modify the line below to include the new fields
+// Existing line in your code
+listItem.textContent = `${movie.title_type} - ${movie.title_primaryTitle} - ${movie.title_originalTitle} - ${movie.title_isAdult ? 'Adult' : 'Not Adult'} - ${movie.title_startYear} - ${movie.title_endYear} - ${movie.title_runtimeMinutes} mins - Poster: ${movie.title_posterURL} - Average Rating: ${movie.avRating} - Number of Votes: ${movie.nVotes}`;
+
+// Replace it with the modified line
+listItem.innerHTML = `
+    <strong>${movie.title_type}</strong> - <br>
+    ${movie.title_primaryTitle} - <br>
+    ${movie.title_originalTitle} - <br>
+    ${movie.title_isAdult ? 'For Adults' : 'For All Ages'} - <br>
+    ${movie.title_startYear ? 'Start Year: ' + movie.title_startYear : ''} - 
+    ${movie.title_endYear ? 'End Year: ' + movie.title_endYear : 'Present'} - <br>
+    ${movie.title_runtimeMinutes ? 'Runtime: ' + movie.title_runtimeMinutes + ' mins' : ''} - <br>
+    <em>Poster:</em> <img src="${getPosterUrl(movie.title_posterURL, `w92`)}" alt="Movie Poster" style="max-height: 100px;"> - <br>
+    <em>Average Rating:</em> ${movie.avRating !== undefined ? 'Rating: ' + movie.avRating.toFixed(1) : 'Rating: Not available'} - <br>
+    <em>Number of Votes:</em> ${movie.nVotes !== undefined ? 'Votes: ' + movie.nVotes : 'Votes: Not available'} <br><br>
+`;
+                    resultList.appendChild(listItem);
+                });
+
+                resultContainer.appendChild(resultList);
+            } else {
+                resultContainer.textContent = 'No matching movies found.';
+            }
+        }
+
+        async function searchNames() {
+    const searchInput = document.getElementById('searchInput').value;
+
+    if (!searchInput) {
+        alert('Please enter a name.');
+        return;
+    }
+
+    try {
+        const apiUrl = `/energy/api/searchname?namePart=${searchInput}`;
+        console.log('Fetching data from:', apiUrl);  // Log the URL being used
+
+        const response = await fetch(apiUrl);
+        if (!response.ok) {
+            console.error('Error:', response.statusText);
+            return;
+        }
+
+        const data = await response.json();
+        console.log('Data received:', data);  // Log the data received
+
+        displayResultss(data);
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
+}
+
+
+        function displayResultss(data) {
+            const resultContainer = document.getElementById('resultContainer');
+            resultContainer.innerHTML = '';
+
+            if (data.length > 0) {
+                const resultList = document.createElement('ul');
+
+                data.forEach(name => {
+                    const listItem = document.createElement('li');
+                    listItem.innerHTML = `
+                        <strong>${name.name}</strong> - <br>
+                        Birth Year: ${name.birthYr || 'N/A'} - <br>
+                        Death Year: ${name.deathYr || 'Present'} - <br>
+                        Profession: ${name.profession || 'N/A'} - <br>
+                        <em>Poster:</em> <img src="${getPosterUrl(name.namePoster, `w92`)}" alt="Name Poster" style="max-height: 100px;"> <br><br>
+                    `;
+                    resultList.appendChild(listItem);
+                });
+
+                resultContainer.appendChild(resultList);
+            } else {
+                resultContainer.textContent = 'No matching names found.';
+            }
+        }
+
+        // Function to replace width variable in poster URL
+        function getPosterUrl(url, width) {
+            if (url) {
+                return url.replace('{width_variable}', width);
+            }
+            return '';
+        }
+         
+    </script>
+    
+    
+</body>
+</html>
+and now I want every time the data is returned from this /energy/api/searchname?namePart=${searchInput}
+
+data to be displayed on the computer via Index_actor_details
+
+
+
+
+//////////////////////////////////////////////////////////////////////
+
+
+
+chatgbt:
+Certainly! To achieve that, you can create a function in your index_search.html to handle the display of actor details and call this function when the data is returned from /energy/api/searchname?namePart=${searchInput}. Here's how you can modify your code:
+
+First, update index_search.html:
+
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (your head content remains unchanged) ... -->
+</head>
+<body>
+    <!-- ... (your body content remains unchanged) ... -->
+
+    <script>
+        // Existing code...
+
+        async function searchNames() {
+            const searchInput = document.getElementById('searchInput').value;
+
+            if (!searchInput) {
+                alert('Please enter a name.');
+                return;
+            }
+
+            try {
+                const apiUrl = `/energy/api/searchname?namePart=${searchInput}`;
+                console.log('Fetching data from:', apiUrl);
+
+                const response = await fetch(apiUrl);
+
+                if (!response.ok) {
+                    console.error('Error:', response.statusText);
+                    return;
+                }
+
+                const data = await response.json();
+                console.log('Data received:', data);
+
+                // Display actor details using the new function
+                displayActorDetails(data);
+            } catch (error) {
+                console.error('Error fetching data:', error);
+            }
+        }
+
+        function displayActorDetails(data) {
+            // Assuming you have an array of actors in the response
+            if (data.length > 0) {
+                // Display details for the first actor (you may loop through all actors as needed)
+                const firstActor = data[0];
+
+                // Redirect to actor details page with actor data
+                window.location.href = `/path/to/index_actor_details.html?name=${firstActor.name}&birthYear=${firstActor.birthYr || ''}&deathYear=${firstActor.deathYr || 'Present'}&profession=${firstActor.profession || ''}&posterUrl=${getPosterUrl(firstActor.namePoster, 'w92') || ''}`;
+            } else {
+                // No matching names found
+                alert('No matching names found.');
+            }
+        }
+
+        // Existing code...
+    </script>
+</body>
+</html>
+Now, create a new index_actor_details.html where JavaScript extracts query parameters and sets the actor details dynamically:
+
+html
+Copy code
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <!-- ... (your head content remains unchanged) ... -->
+</head>
+<body>
+    <!-- ... (your body content remains unchanged) ... -->
+
+    <script>
+        // Extract query parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const actorDetails = {
+            name: urlParams.get('name') || 'Unknown',
+            birthYear: urlParams.get('birthYear') || 'N/A',
+            deathYear: urlParams.get('deathYear') || 'Present',
+            profession: urlParams.get('profession') || 'N/A',
+            posterUrl: urlParams.get('posterUrl') || '',
+        };
+
+        // Set actor details dynamically
+        document.getElementById('actorTitle').innerText = actorDetails.name;
+        document.getElementById('actorName').innerText = actorDetails.name;
+        document.getElementById('actorPicture').src = actorDetails.posterUrl;
+        document.getElementById('actorProfession').innerText = actorDetails.profession;
+        document.getElementById('actorBirthYear').innerText = `Year of Birth: ${actorDetails.birthYear}`;
+        document.getElementById('actorDeathYear').innerText = `Year of Death: ${actorDetails.deathYear}`;
+    </script>
+</body>
+</html>
+
+
+
+
+
+This way, when data is returned from /energy/api/searchname, it will redirect to index_actor_details.html with the actor details as query parameters, and the JavaScript in index_actor_details.html will dynamically set the content based on those parameters.

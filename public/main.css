@@ -1,3 +1,5 @@
+
+
 @import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,500;1,600;1,700;1,800;1,900&display=swap');
 *{
     margin: 0;
@@ -846,6 +848,45 @@ margin-left: 120px;
 .hamburger:focus{
     outline: none;
 }
+.resultBox {
+    border: 1px solid white;
+    padding: 10px;
+    margin-bottom: 10px;
+    margin-top: 100px;
+    background-color: #141414;
+    color: white;
+}
+
+#resultHeader {
+    font-size: 25px;
+    color: rgb(18, 241, 241);
+    margin-top: 80px;
+    margin-left: -30px;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+#resultsContainer {
+    display: flex;
+    justify-content: space-between;
+    color: white;
+    margin-top: 50px;
+    margin-left: 200px;
+    background-color: #141414;
+    text-align: center;
+}
+
+#viewContainer {
+    display: flex;
+    justify-content: space-between;
+    margin-left: 0px;
+    background-color: #141414;
+}
+
+#nameResults {
+    margin-left: 300px;
+    margin-right: 50px;
+}
 
 @media(max-width:360px)
 {
@@ -858,3 +899,5 @@ margin-left: 120px;
 
 
 }
+
+

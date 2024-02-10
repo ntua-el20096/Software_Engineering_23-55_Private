@@ -8,7 +8,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css">
     <link rel="icon" href="small_logo.png">
     <title>John Lennon</title>
-    <!-- there goes the title of the movie -->
 </head>
 
 <body>
@@ -36,9 +35,12 @@
             <img src="" alt="Actor Poster" id="posterImg">
         </div>
     </section>
-
+    <div class="slatest-movies">
+        <h1>Movies</h1>
+        <div class="slatest-container" id="slatestContainer"></div>
+    </div>
+    <script src="works.js"></script>
     <script>
-        // Function to parse query parameters from the URL
         function getQueryParams() {
             const queryParams = {};
             const queryString = window.location.search.substring(1);
@@ -52,27 +54,29 @@
             return queryParams;
         }
 
-        // Function to retrieve a specific query parameter
         function getQueryParam(param) {
             const queryParams = getQueryParams();
             return queryParams[param] || 'N/A';
         }
 
-         
-
         document.addEventListener('DOMContentLoaded', function () {
-            const name = getQueryParam('name');
-            const birthYear = getQueryParam('birthYear');
-            const deathYear = getQueryParam('deathYear');
-            const profession = getQueryParam('profession');
-            const posterUrl = getQueryParam('posterUrl');
-
-            document.getElementById('actorName').textContent = name;
-            document.getElementById('birthYear').textContent = `Birth Year: ${birthYear}`;
-            document.getElementById('deathYear').textContent = `Death Year: ${deathYear}`;
-            document.getElementById('profession').textContent = `Profession: ${profession}`;
+    const nameID = getQueryParam('nameID');
+    // Fetch actor details using an API endpoint
+    fetch(`https://localhost:8765/energy/api/name/${nameID}`)
+        .then(response => response.json())
+        .then(data => {
+            const actorDetails = data.nameObject;
+            document.getElementById('actorName').textContent = actorDetails.name;
+            document.getElementById('birthYear').textContent = `Birth Year: ${actorDetails.birthYr}`;
+            document.getElementById('deathYear').textContent = `Death Year: ${actorDetails.deathYr}`;
+            document.getElementById('profession').textContent = `Profession: ${actorDetails.profession}`;
+            
+            // Replace {width_variable} with 'w500' or your desired width
+            const posterUrl = actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
             document.getElementById('posterImg').src = posterUrl;
-        });
+        })
+        .catch(error => console.error('Error fetching actor details:', error));
+});
     </script>
 </body>
 </html>
