@@ -6,24 +6,21 @@ function scrollRight() {
         behavior: 'smooth' // Add smooth scrolling effect
     });
 }
- 
+
 // Retrieve actor's details array from sessionStorage
 var actorDetailsArray = JSON.parse(sessionStorage.getItem('actorDetailsArray')) || [];
 
 // Array of slatest movies
-var slatestMovies = [
-    
-         
-    ];
-
+var slatestMovies = [];
+ 
 // Iterate through the actorDetailsArray and create entries for slatestMovies
 actorDetailsArray.forEach(actorDetails => {
     // Create an entry for slatestMovies
     var slatestMovieForActor = {
         nameID: actorDetails.nameID,
         name: actorDetails.name,
-        category: actorDetails.category,
-        posterURL: "https://image.tmdb.org/t/p/w92/" + actorDetails.posterURL
+        category: actorDetails.category || 'N/A',
+       // posterURL: posterURL
     };
 
     // Append the new entry to slatestMovies
@@ -35,34 +32,89 @@ function redirectToActorDetails(nameID) {
     window.location.href = `index_actor_details.html?nameID=${nameID}`;
 }
 
-// Iterate through the slatestMovies array
-for (var i = 0; i < slatestMovies.length; i++) {
-    var slatestMovie = slatestMovies[i];
+function fetchActorDetails(nameID) {
+    return fetch(`https://localhost:8765/energy/api/name/${nameID}`)
+        .then(response => response.json())
+        .then(data => {
+            const actorDetails = data.nameObject;
 
-    // Create movie elements
+            // Use the principal_imageURL for the actor's poster
+            const posterURL = actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
+
+            return {
+                 nameID: actorDetails.nameID,
+                 name: actorDetails.name,
+               // category: actorDetails.category || 'N/A',
+                posterURL: posterURL
+            };
+        })
+        .catch(error => {
+            console.error('Error fetching actor details:', error);
+            return {
+                nameID: nameID,
+                name: `Name ID: ${nameID}`,
+               // category: 'N/A',
+                posterURL: 'default_poster.jpg'
+            };
+        });
+}
+ 
+// Fetch posters for each actor
+var postersPromises = slatestMovies.map(actor => fetchActorDetails(actor.nameID));
+
+Promise.all(postersPromises)
+    .then(updatedSlates => {
+        // Update slatestMovies with the fetched posters
+        slatestMovies = updatedSlates;
+
+        // After fetching posters, update the UI
+        updateUI();
+    })
+    .catch(error => console.error('Error fetching posters:', error));
+
+// ... (your existing code)
+
+function updateUI() {
+    // Get the container where you want to display the slatest movies
     var slatestContainer = document.getElementById("slatestContainer");
-    var slatestDiv = document.createElement("div");
-    slatestDiv.classList.add("slatest-inside");
 
-    // Set the values in the HTML elements for each slatest movie
-    slatestDiv.innerHTML = `
-        <img class="posterImage" src="${slatestMovie.posterURL}" alt=" ">
-        <!-- there goes the actor's photo -->
-        <div class="heading1">
-            <h4 class="movieTitle">${slatestMovie.name}</h4>
-            <p class="movieCategory">${slatestMovie.category}</p>
-            <!-- there goes the actor's name -->
-        </div>
-    `;
+    // Clear the container before adding the updated movie elements
+    slatestContainer.innerHTML = '';
 
-    // Add an event listener to each slatest movie element
-    slatestDiv.addEventListener("click", (function (nameID) {
-        return function () {
-            // Redirect to index_actor_details.html with the corresponding nameID
-            redirectToActorDetails(nameID);
-        }
-    })(slatestMovie.nameID));
+    // Iterate through the slatestMovies array
+    for (var i = 0; i < slatestMovies.length; i++) {
+        var slatestMovie = slatestMovies[i];
 
-    // Append the movie elements to the slatest container
-    slatestContainer.appendChild(slatestDiv);
+        // Check if the posterURL is \\N, replace it with default image
+        var posterURL = slatestMovie.posterURL === '\\N' ? 'big_logo.png' : slatestMovie.posterURL;
+
+        // Log the posterURL to check if it's correct
+        console.log('Poster URL:', posterURL);
+
+        // Create movie elements
+        var slatestDiv = document.createElement("div");
+        slatestDiv.classList.add("slatest-inside");
+
+        // Set the values in the HTML elements for each slatest movie
+        slatestDiv.innerHTML = `
+            <img class="posterImage" src="${posterURL}" alt=" ">
+            <!-- there goes the actor's photo -->
+            <div class="heading1">
+                <h4 class="movieTitle">${slatestMovie.name}</h4>
+                <p class="movieCategory">${slatestMovie.category}</p>
+                <!-- there goes the actor's name -->
+            </div>
+        `;
+
+        // Add an event listener to each slatest movie element
+        slatestDiv.addEventListener("click", (function (nameID) {
+            return function () {
+                // Redirect to index_actor_details.html with the corresponding nameID
+                redirectToActorDetails(nameID);
+            }
+        })(slatestMovie.nameID));
+
+        // Append the movie elements to the slatest container
+        slatestContainer.appendChild(slatestDiv);
+    }
 }
