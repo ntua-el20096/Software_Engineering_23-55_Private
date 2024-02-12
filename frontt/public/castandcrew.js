@@ -14,17 +14,26 @@ var actorDetailsArray = JSON.parse(sessionStorage.getItem('actorDetailsArray')) 
 var slatestMovies = [];
  
 // Iterate through the actorDetailsArray and create entries for slatestMovies
-actorDetailsArray.forEach(actorDetails => {
+actorDetailsArray.forEach(async actorDetails => {
     // Create an entry for slatestMovies
-    var slatestMovieForActor = {
-        nameID: actorDetails.nameID,
-        name: actorDetails.name,
-        category: actorDetails.category || 'N/A',
-       // posterURL: posterURL
-    };
+    try {
+        // Fetch additional details including category from the API
+        const additionalDetails = await fetchActorDetails(actorDetails.nameID);
 
-    // Append the new entry to slatestMovies
-    slatestMovies.push(slatestMovieForActor);
+        // Create an entry for slatestMovies
+        var slatestMovieForActor = {
+            nameID: actorDetails.nameID,
+            name: actorDetails.name,
+            category: actorDetails.category || 'N/A',// Use the category fetched from the API
+            posterURL: additionalDetails.posterURL
+        };
+
+        // Append the new entry to slatestMovies
+        slatestMovies.push(slatestMovieForActor);
+    } catch (error) {
+        console.error('Error fetching actor details:', error);
+        // Handle error if needed
+    }
 });
 
 // Iterate through the slatestMovies array
@@ -62,15 +71,36 @@ function fetchActorDetails(nameID) {
 // Fetch posters for each actor
 var postersPromises = slatestMovies.map(actor => fetchActorDetails(actor.nameID));
 
-Promise.all(postersPromises)
-    .then(updatedSlates => {
-        // Update slatestMovies with the fetched posters
-        slatestMovies = updatedSlates;
+Promise.all(actorDetailsArray.map(async actorDetails => {
+    try {
+        // Fetch additional details including category from the API
+        const additionalDetails = await fetchActorDetails(actorDetails.nameID);
 
-        // After fetching posters, update the UI
-        updateUI();
-    })
-    .catch(error => console.error('Error fetching posters:', error));
+        // Create an entry for slatestMovies
+        var slatestMovieForActor = {
+            nameID: actorDetails.nameID,
+            name: actorDetails.name,
+            category: actorDetails.category || 'N/A', // Use the category fetched from the API
+            posterURL: additionalDetails.posterURL
+        };
+
+        // Append the new entry to slatestMovies
+        return slatestMovieForActor;
+    } catch (error) {
+        console.error('Error fetching actor details:', error);
+        // Handle error if needed
+        return null;
+    }
+}))
+.then(updatedSlates => {
+    // Filter out null values (entries with errors) from the updatedSlates array
+    slatestMovies = updatedSlates.filter(movie => movie !== null);
+
+    // After fetching posters, update the UI
+    updateUI();
+})
+.catch(error => console.error('Error fetching actor details:', error));
+
 
 // ... (your existing code)
 
