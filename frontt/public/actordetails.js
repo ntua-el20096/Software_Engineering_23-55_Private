@@ -17,20 +17,28 @@ function getQueryParam(param) {
 }
 
 document.addEventListener('DOMContentLoaded', function () {
-const nameID = getQueryParam('nameID');
-// Fetch actor details using an API endpoint
-fetch(`https://localhost:8765/energy/api/name/${nameID}`)
-.then(response => response.json())
-.then(data => {
-    const actorDetails = data.nameObject;
-    document.getElementById('actorName').textContent = actorDetails.name;
-    document.getElementById('birthYear').textContent = `Birth Year: ${actorDetails.birthYr}`;
-    document.getElementById('deathYear').textContent = `Death Year: ${actorDetails.deathYr}`;
-    document.getElementById('profession').textContent = `Profession: ${actorDetails.profession}`;
-    
-    // Replace {width_variable} with 'w500' or your desired width
-    const posterUrl = actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
-    document.getElementById('posterImg').src = posterUrl;
-})
-.catch(error => console.error('Error fetching actor details:', error));
+    const nameID = getQueryParam('nameID');
+    console.log('nameID:', nameID);
+
+    // Fetch actor details using an API endpoint
+    fetch(`https://localhost:8765/energy/api/name/${nameID}`)
+        .then(response => response.json())
+        .then(data => {
+            console.log('API Response:', data);
+
+            const actorDetails = data.nameObject;
+            console.log('Actor Details:', actorDetails);
+
+            // Ensure that actorDetails.name is not undefined
+             
+            document.querySelector('.heropage h1').textContent = actorDetails.name;
+            document.getElementById('birthYear').textContent = `Birth Year: ${actorDetails.birthYr}`;
+            document.getElementById('deathYear').textContent = `Death Year: ${actorDetails.deathYr}`;
+            document.getElementById('profession').textContent = `Profession: ${actorDetails.profession}`;
+
+            // Replace {width_variable} with 'w500' or your desired width
+            const posterUrl = actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
+            document.getElementById('posterImg').src = posterUrl;
+        })
+        .catch(error => console.error('Error fetching actor details:', error));
 });
