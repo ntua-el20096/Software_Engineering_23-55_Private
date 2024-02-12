@@ -899,3 +899,32 @@ margin-left: 120px;
 }
 
 
+#searchInput {
+    padding: 10px;
+    width: 300px;
+    border: 2px solid #ddd; /* Light grey border */
+    border-radius: 20px; /* Rounded corners */
+    transition: all 0.3s ease-in-out; /* Smooth transition for effects */
+    outline: none; /* Removes the outline */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2); /* Adds a subtle shadow */
+}
+
+#searchInput:focus {
+    border-color: #007bff; /* Changes border color on focus */
+    box-shadow: 0 0 8px rgba(0, 123, 255, 0.5); /* More pronounced shadow on focus */
+    width: 350px; /* Optionally expand the input field */
+}
+
+#searchButton {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 20px; /* Rounded corners */
+    background-color: #007bff; /* Bootstrap primary color */
+    color: white;
+    cursor: pointer;
+    transition: background-color 0.3s ease-in-out; /* Smooth transition for background color */
+}
+
+#searchButton:hover {
+    background-color: #0056b3; /* Darker shade on hover */
+}
