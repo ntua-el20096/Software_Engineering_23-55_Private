@@ -1,4 +1,4 @@
-//what does this code do? Connecting to the server which listens 
+ //what does this code do? Connecting to the server which listens 
 //on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
 //3,5,6 endpoints don't work because of the foreign keys? or not idk
@@ -11,8 +11,10 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-const compression = require('compression'); // Import the compression middleware
-
+const cors = require('cors');
+ 
+//const compression = require('compression'); // Import the compression middleware
+ 
  
 const httpsOptions = {
   key: fs.readFileSync('server.key', 'utf8'),
@@ -21,9 +23,11 @@ const httpsOptions = {
 };
 
 const app = express();
+app.use(express.json()); // Parse JSON requests
 
 const port = 8765;
 const baseURL = '/energy/api';
+app.use(cors()); // Enable CORS for all routes
 
 // Simulated database connection string
 const databaseConfig = {
@@ -34,7 +38,7 @@ const databaseConfig = {
     port: 3307
 
 };
-app.use(compression());
+//app.use(compression());
 
 app.use(bodyParser.json());
 
@@ -54,9 +58,10 @@ app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   // Assuming you want to serve the index.html file
- res.sendFile(path.join(__dirname, 'public', 'index_homepage.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index_homepage.html'));
 //res.sendFile(path.join(__dirname, 'public', 'index_movie_details.html'));
- 
+  //res.sendFile(path.join(__dirname, 'public', 'bygenre.html'));
+
  // res.sendFile(path.join(__dirname, 'public', 'index_actor_details.html'));
 
 //res.sendFile(path.join(__dirname, 'public', 'index_search.html'));
@@ -622,6 +627,86 @@ app.get(`${baseURL}/bygenre`, async (req, res) => {
   } catch (error) {
       console.error('Database error:', error);
       res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+});
+
+
+
+
+
+
+app.post(`${baseURL}/bygenre`, async (req, res) => {
+  const { qgenre, minrating, yrFrom, yrTo } = req.body;
+
+  // Start building the query
+  let query = `
+      SELECT 
+          tb.title_id AS titleID, 
+          tb.title_type AS type, 
+          tb.title_originalTitle AS originalTitle, 
+          tb.title_posterURL AS titlePoster, 
+          tb.title_startYear AS startYear, 
+          tb.title_endYear AS endYear, 
+          tb.title_genre AS genres,
+          tr.rating_avg AS avRating
+      FROM title_basics tb
+      LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+      WHERE tb.title_genre LIKE ? AND tr.rating_avg >= ?
+  `;
+
+  const queryParams = [`%${qgenre}%`, minrating];
+
+  // Add year range conditions if provided
+  if (yrFrom) {
+      query += ` AND tb.title_startYear >= ?`;
+      queryParams.push(yrFrom);
+  }
+  if (yrTo) {
+      query += ` AND tb.title_startYear <= ?`;
+      queryParams.push(yrTo);
+  }
+
+  try {
+      // Establish a connection to the database
+      const connection = mysql.createConnection(databaseConfig);
+
+      // Execute the query
+      const [results] = await connection.promise().query(query, queryParams);
+  var titleObjectList = [];
+  for (var i = 0; i < results.length; i++) {
+    var titleObject = results[i];
+    titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+    let akasQuery = `SELECT 
+      aka_title AS akaTitle,
+      AKA_region AS regionAbbrev 
+      FROM title_AKAs 
+      WHERE title_title_id = ?`;
+    const [akasResult] = await connection.promise().query(akasQuery, [titleObject.titleID]);
+    titleObject.titleAkas = akasResult;
+    let principalsQuery = `
+      SELECT 
+          np.principal_id AS nameID, 
+          np.principal_name AS name, 
+          tp.principal_category AS category
+      FROM title_principals tp
+      JOIN principal np ON tp.principal_principal_id = np.principal_id
+      WHERE tp.title_title_id = ?`;
+  const [principalsResult] = await connection.promise().query(principalsQuery, [titleObject.titleID]);
+  titleObject.principals = principalsResult;
+  titleObjectList.push(titleObject);
+  }
+    // Return the results
+    res.status(200).json({titleObjectList});
+
+    // Close the database connection
+    connection.end();
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({
+        message: 'Internal server error',
+        error: error.message,
+        titleObjectList: []
+    });
   }
 });
 
