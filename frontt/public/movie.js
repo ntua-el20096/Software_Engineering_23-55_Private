@@ -1,5 +1,5 @@
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('Script loaded and DOMContentLoaded event triggered.');
+  console.log('Script loaded and DOMContentLoaded event triggered.' );
 
   const queryParams = getQueryParams();
   console.log('Query Parameters:', queryParams);
@@ -21,7 +21,10 @@ document.addEventListener('DOMContentLoaded', function () {
         sessionStorage.setItem('actorDetailsArray', JSON.stringify(titleObject.principals));
       }
       // Update HTML elements with movie details
-      document.getElementById('movieTitle').textContent = titleObject.originalTitle;
+      //document.getElementById('heroMovieTitle').textContent = titleObject.originalTitle;
+      document.querySelector('.heropage h1').textContent = titleObject.originalTitle;
+
+      //document.getElementById('movieTitle').textContent = titleObject.originalTitle;
       document.getElementById('movieCategory').textContent = `Category: ${titleObject.type}`;
       document.getElementById('movieReleaseYear').textContent = `Release Year: ${titleObject.startYear}`;
       document.getElementById('movieRating').textContent = `Rating: ${titleObject.avRating}`;
@@ -61,3 +64,17 @@ function getQueryParams() {
 
   return queryParams;
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
