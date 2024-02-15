@@ -49,6 +49,13 @@
             flex: 0 0 auto;
             width: 200px;
         }
+
+        .ipc-btn--single-padding {
+    position: absolute; /* or 'fixed' depending on your layout */
+    left: 80%; /* Adjust this value as needed */
+    top: auto; /* Adjust or remove based on your needs */
+}
+
     </style>
 </head>
 <style>
@@ -82,7 +89,31 @@
                 <h3>NTUA Flix</h3>
             </a>
         </div>
-         
+        <a class="ipc-btn ipc-btn--single-padding ipc-btn--center-align-content ipc-btn--default-height ipc-btn--core-baseAlt ipc-btn--theme-baseAlt ipc-btn--on-textPrimary ipc-text-button sc-acdbf0f3-2 caaLCv" 
+        tabindex="0" 
+        aria-label="View User Ratings" 
+        aria-disabled="false">
+        <span class="ipc-btn__text">
+            <div class="sc-acdbf0f3-3 eWQwwe">
+                <div class="sc-bde20123-4 jIEDat">
+                    <!-- This div is for alignment, ensure it is styled appropriately -->
+                    <div style="display: flex; align-items: center;">
+                        <!-- SVG star icon -->
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="ipc-icon ipc-icon--star sc-bde20123-4 frBGmx" viewBox="0 0 24 24" fill="currentColor" role="presentation">
+                            <path d="M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z"></path>
+                        </svg>
+                <div class="sc-bde20123-0 dLwiNw">
+                    <div data-testid="hero-rating-bar__aggregate-rating__score" class="sc-bde20123-2 cdQqzc">
+                        <!-- Movie rating and "/10" -->
+                        <span id="movieRating"></span><!--
+                        --><span>/10</span>
+                    </div>
+                    <div class="sc-bde20123-5 gyVtuR"></div>
+                    <p id="movieVotes"></p>
+                </div>
+            </div>
+        </span>
+     </a>     
     </header>
     
     <!-- Hero section -->
@@ -102,31 +133,7 @@
                    <!---  <p id="movieTitleAkas"></p>-->
                 
                <!-----> <div id="moviePrincipals"></div>  <!----->
-               <a class="ipc-btn ipc-btn--single-padding ipc-btn--center-align-content ipc-btn--default-height ipc-btn--core-baseAlt ipc-btn--theme-baseAlt ipc-btn--on-textPrimary ipc-text-button sc-acdbf0f3-2 caaLCv" 
-               role="button" 
-               tabindex="0" 
-               aria-label="View User Ratings" 
-               aria-disabled="false" 
-               href="/title/tt22325164/ratings/?ref_=tt_ov_rt">
-                <span class="ipc-btn__text">
-                    <div class="sc-acdbf0f3-3 eWQwwe">
-                        <div class="sc-bde20123-4 jIEDat">
-                            <!-- Move the star icon here -->
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" class="ipc-icon ipc-icon--star sc-bde20123-4 frBGmx" viewBox="0 0 24 24" fill="currentColor" role="presentation">
-                                <path d="M12 17.27l4.15 2.51c.76.46 1.69-.22 1.49-1.08l-1.1-4.72 3.67-3.18c.67-.58.31-1.68-.57-1.75l-4.83-.41-1.89-4.46c-.34-.81-1.5-.81-1.84 0L9.19 8.63l-4.83.41c-.88.07-1.24 1.17-.57 1.75l3.67 3.18-1.1 4.72c-.2.86.73 1.54 1.49 1.08l4.15-2.5z"></path>
-                            </svg>
-                        </div>
-                        <div class="sc-bde20123-0 dLwiNw">
-                            <div data-testid="hero-rating-bar__aggregate-rating__score" class="sc-bde20123-2 cdQqzc">
-                                <span class="sc-bde20123-1 cMEQkK">6.8</span>
-                                <span>/<!-- -->10</span>
-                            </div>
-                            <div class="sc-bde20123-5 gyVtuR"></div>
-                            <div class="sc-bde20123-3 gPVQxL">146</div>
-                        </div>
-                    </div>
-                </span>
-            </a>
+                
                
                 </div>
             </div>
