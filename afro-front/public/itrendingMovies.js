@@ -1,14 +1,24 @@
 var movies = [
-    { title: "TENET", imdbRating: "9.8", posterURL: "small_logo.png" },
-    { title: "WW 84", imdbRating: "8.5", posterURL: "images/hollywood/12.jpg" },
-    { title: "MONOCHROME", imdbRating: "9.2", posterURL: "images/hollywood/13.jpg" },
-    { title: "MORTAL", imdbRating: "8.5", posterURL: "images/hollywood/14.jpg" },
-    { title: "DONT LOOK BACK", imdbRating: "8.9", posterURL: "images/hollywood/15.jpg" },
+    { titleID: 'tt0099851' ,title: "Into the Woods", imdbRating: "8.7", posterURL: "https://image.tmdb.org/t/p/w500/uwMNWZg9gxCNCeruYvEdBN3Zhyb.jpg\r" },
+    //tt0099851
+    { titleID: 'tt0103062',title: "Tell Me That You Love Me", imdbRating: " 8.2", posterURL: "https://image.tmdb.org/t/p/w500/hEBf4QPMswqPnOe6GlwhqDozhVi.jpg\r" },
+    //tt0103062
+    { titleID: 'tt0090144',title: "Le temps des bouffons", imdbRating: "8.1", posterURL: "https://image.tmdb.org/t/p/w500/7PVsQkiQsMf5j4pviQgEKJh4BPo.jpg\r" },
+    //tt0090144
+    { titleID: 'tt0095571',title: "The Making of Monsters", imdbRating: "8.4", posterURL: "https://image.tmdb.org/t/p/w500/zgenzvJ09QuRaduURuBuQzmM4jy.jpg\r" },
+    //	
+//tt0095571
+    { titleID: 'tt0098542', title: "Ti, koyto si na nebeto", imdbRating: "8.2", posterURL: "https://image.tmdb.org/t/p/w500/pLGv4Jpb4IhOSNj4rOpkLLvhRfa.jpg\r" },
+    //tt0098542
     // { title: "BLOOD HOUND", imdbRating: "8.5", posterURL: "images/hollywood/3.jpg" },
     // { title: "REUNION", imdbRating: "9.5", posterURL: "images/hollywood/1.jpg" }
 ];
 
-// Get the Hollywood container
+
+ 
+
+ 
+
 var iollywoodContainer = document.getElementById("iollywoodContainer");
 
 // Dynamically create and append movie items
@@ -31,5 +41,17 @@ movies.forEach(function (movie) {
     movieDiv.appendChild(h3);
     movieDiv.appendChild(imdbDiv);
 
+    // Add an event listener to each movie element
+    movieDiv.addEventListener('click', function () {
+        // Redirect to index_movie_details.html with the corresponding titleID
+        redirectToMovieDetails(movie.titleID);
+    });
+
     iollywoodContainer.appendChild(movieDiv);
 });
+
+// Redirect function
+function redirectToMovieDetails(titleID) {
+    // Use encodeURIComponent to make sure the titleID is properly formatted for a URL
+    window.location.href = `index_movie_details.html?titleID=${encodeURIComponent(titleID)}`;
+}
