@@ -100,3 +100,11 @@ async function searchMovies() {
             }
             return '';
         }
+
+        document.getElementById('searchInput').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') { // Check if the key pressed is 'Enter'
+                event.preventDefault(); // Prevent the default action to ensure form isn't submitted
+                document.getElementById('searchButton').click(); // Programmatically click the search button
+            }
+        });
+        
