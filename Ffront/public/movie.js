@@ -1,9 +1,7 @@
-
-
 const baseurl = 'https://localhost:8765/energy/api';
 
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('Script loaded and DOMContentLoaded event triggered.' );
+  console.log('Script loaded and DOMContentLoaded event triggered.');
 
   const queryParams = getQueryParams();
   console.log('Query Parameters:', queryParams);
@@ -24,37 +22,31 @@ document.addEventListener('DOMContentLoaded', function () {
       if (titleObject.principals.length > 0) {
         sessionStorage.setItem('actorDetailsArray', JSON.stringify(titleObject.principals));
       }
-      // Update HTML elements with movie details
-      //document.getElementById('heroMovieTitle').textContent = titleObject.originalTitle;
       document.querySelector('.heropage h1').textContent = titleObject.originalTitle;
 
-      //document.getElementById('movieTitle').textContent = titleObject.originalTitle;
-      document.getElementById('movieCategory').textContent = `Category: ${titleObject.type}`;
-      //document.getElementById('movieReleaseYear').textContent = `Release Year: ${titleObject.startYear}`;
+      // Check if type is '/N' and set text content accordingly
+      const categoryText = titleObject.type === '\\N' ? 'Not categorized' : titleObject.type;
+      document.getElementById('movieCategory').textContent = `Category: ${categoryText}`;
+
       document.getElementById('movieReleaseYear').textContent = `This work has been released: ${titleObject.startYear}`;
-      document.getElementById('movieRating').textContent = `Rating: ${titleObject.avRating}`;
-      document.getElementById('movieVotes').textContent = `While they voted: ${titleObject.nVotes}`;
+      document.getElementById('movieRating').textContent = ` ${titleObject.avRating}`;
+      document.getElementById('movieVotes').textContent = ` # of Votes: ${titleObject.nVotes}`;
 
       // Display genres
-      const genres = titleObject.genres.map(genre => genre.genreTitle).join(', ');
-       
-      document.getElementById('movieGenres').textContent = `It falls into the category of  ${genres}`;
+      // Display genres
+const genres = titleObject.genres.map(genre => genre.genreTitle).join(', ');
 
-      //document.getElementById('movieGenres').textContent = `Genres: ${genres}`;
+if (genres === '\\N') { // Check if genres is '\N'
+  document.getElementById('movieGenres').textContent = "Not categorized";
+} else {
+  document.getElementById('movieGenres').textContent = `It falls into the category of ${genres}`;
+}
 
-      // Display titleAkas
-     // const titleAkas = titleObject.titleAkas.map(aka => aka.akaTitle).join(', ');
-      //document.getElementById('movieTitleAkas').textContent = `AKA Titles: ${titleAkas}`;
-      const posterUrl = titleObject.titlePoster === '\\N' ? 'big_logo.png' : titleObject.titlePoster.replace('{width_variable}', 'w500') || '';      console.log('Poster URL:', posterUrl); // Log the poster URL
+
+      const posterUrl = titleObject.titlePoster === '\\N' ? 'big_logo.png' : titleObject.titlePoster.replace('{width_variable}', 'w500') || '';
+      console.log('Poster URL:', posterUrl);
       document.getElementById('posterImg').src = posterUrl;
-      // Display principals
-      // const principalsContainer = document.getElementById('moviePrincipals');
-      // titleObject.principals.forEach(principal => {
-      //   const principalElement = document.createElement('div');
-      //   principalElement.textContent = `${principal.category}: ${principal.name}`;
-      //   principalsContainer.appendChild(principalElement);
-      // });
-       
+      document.dispatchEvent(new CustomEvent('MovieDataLoaded'));
     })
     .catch(error => console.error('Error fetching movie details:', error));
 });
