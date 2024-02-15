@@ -27,35 +27,34 @@ function scrollLeft() {
     const container = document.querySelector('.slatest-movies');
     container.scrollLeft -= 150; // Adjust the scroll distance
 }
-// Retrieve actor's details array from sessionStorage
- var actorDetailsArray = JSON.parse(sessionStorage.getItem('actorDetailsArray')) || [];
 
-// Array of slatest movies
-var slatestMovies = [];
+document.addEventListener('MovieDataLoaded', function () {
+    // Begin of the event listener's function block
+
+    // Retrieve actor's details array from sessionStorage
+    var actorDetailsArray = JSON.parse(sessionStorage.getItem('actorDetailsArray')) || [];
+
+    // Logic to process actorDetailsArray and update the UI
+    // This might include fetching additional details for each actor,
+    // then updating the UI with these details.
+
+    Promise.all(actorDetailsArray.map(actor => fetchActorDetails(actor.nameID)))
+        .then(details => {
+            // Filter out any null values in case some fetches failed
+            slatestMovies = details.filter(detail => detail !== null);
+
+            // Now, update the UI
+            updateUI();
+        })
+        .catch(error => console.error('Error in fetching all actor details:', error));
+
+    // End of the event listener's function block
+}); // H
+// Retrieve actor's details array from sessionStorage
+  
  
 // Iterate through the actorDetailsArray and create entries for slatestMovies
-actorDetailsArray.forEach(async actorDetails => {
-    try {
-        // Fetch additional details including category from the API
-       const additionalDetails = await fetchActorDetails(actorDetails.nameID);
-
-        // Create an entry for slatestMovies
-        var slatestMovieForActor = {
-            nameID: actorDetails.nameID,
-            name: actorDetails.name,
-            category: actorDetails.category || 'N/A',
-            posterURL: additionalDetails.posterURL  // This line is causing an issue
-        };
-
-        // Append the new entry to slatestMovies
-        slatestMovies.push(slatestMovieForActor);
-
-        // ... rest of the code
-    } catch (error) {
-        console.error('Error fetching actor details:', error);
-        // Handle error if needed
-    }
-});
+ 
 
 
 // Iterate through the slatestMovies array
@@ -65,65 +64,37 @@ function redirectToActorDetails(nameID) {
 
 function fetchActorDetails(nameID) {
     return fetch(`${baseurl}/name/${nameID}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
-            const actorDetails = data.nameObject;
-
-            // Use the principal_imageURL for the actor's poster
-            const posterURL = actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
-
+            // Process and return the relevant actor details here
             return {
-                nameID: actorDetails.nameID,
-                name: actorDetails.name,
-                posterURL: posterURL
+                // Assuming your API returns these details
+                nameID: data.nameObject.nameID,
+                name: data.nameObject.name,
+                posterURL: data.nameObject.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg',
             };
         })
         .catch(error => {
             console.error('Error fetching actor details:', error);
-            return {
-                nameID: nameID,
-                name: `Name ID: ${nameID}`,
-                posterURL: 'default_poster.jpg'
-            };
+            return null; // Return null or some default object structure
         });
 }
- 
-// Fetch posters for each actor
-var postersPromises = slatestMovies.map(actor => fetchActorDetails(actor.nameID));
 
-Promise.all(actorDetailsArray.map(async actorDetails => {
-    try {
-        // Fetch additional details including category from the API
-        const additionalDetails = await fetchActorDetails(actorDetails.nameID);
+// Use Promise.all to wait for all actor details to be fetched
+Promise.all(actorDetailsArray.map(actor => fetchActorDetails(actor.nameID)))
+    .then(details => {
+        // Filter out any null values in case some fetches failed
+        slatestMovies = details.filter(detail => detail !== null);
 
-        // Create an entry for slatestMovies
-        var slatestMovieForActor = {
-            nameID: actorDetails.nameID,
-            name: actorDetails.name,
-            category: actorDetails.category || 'N/A',
-            posterURL: additionalDetails.posterURL
-        };
-
-        // Append the new entry to slatestMovies
-        return slatestMovieForActor;
-    } catch (error) {
-        console.error('Error fetching actor details:', error);
-        // Handle error if needed
-        return null;
-    }
-}))
-.then(updatedSlates => {
-    // Filter out null values (entries with errors) from the updatedSlates array
-    slatestMovies = updatedSlates.filter(movie => movie !== null);
-
-    // After fetching posters, update the UI
-    updateUI();
-})
-.catch(error => console.error('Error fetching actor details:', error));
-
-
-// ... (your existing code)
-
+        // Now, update the UI
+        updateUI();
+    })
+    .catch(error => console.error('Error in fetching all actor details:', error));
 function updateUI() {
     // Get the container where you want to display the slatest movies
     var slatestContainer = document.getElementById("slatestContainer");
