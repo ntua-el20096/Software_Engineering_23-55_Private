@@ -501,7 +501,7 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
 
 // Define an endpoint handler for /searchtitle
 app.get(`${baseURL}/searchtitle`, async (req, res) => {
-  const titlePart = req.query.titlePart; // Extract titlePart from query parameters
+  const titlePart = req.body.titlePart; // Extract titlePart from query parameters
 
   if (!titlePart) {
     return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
@@ -558,7 +558,64 @@ app.get(`${baseURL}/searchtitle`, async (req, res) => {
   }
 
 });
+app.post(`${baseURL}/searchtitle`, async (req, res) => {
+  const titlePart = req.body.titlePart; // Extract titlePart from query parameters
 
+  if (!titlePart) {
+    return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+  }
+
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+    const query = `SELECT tb.title_id AS titleID, 
+    tb.title_type AS type, 
+    tb.title_originalTitle AS originalTitle, 
+    tb.title_posterURL AS titlePoster, 
+    tb.title_startYear AS startYear, 
+    tb.title_endYear AS endYear, 
+    tb.title_genre AS genres,
+    tr.rating_avg AS avRating,
+    tr.rating_numVotes AS nVotes
+  FROM title_basics tb
+  LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id 
+  WHERE tb.title_originalTitle LIKE ?`;
+  const likeTitlePart = `%${titlePart}%`; // SQL LIKE query format
+
+  const [titleResult] = await connection.promise().query(query,likeTitlePart);
+  var titleObjectList = [];
+  for (var i = 0; i < titleResult.length; i++) {
+    var titleObject = titleResult[i];
+    titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+    const akasQuery = `SELECT aka_title AS akaTitle, AKA_region AS regionAbbrev FROM title_AKAs WHERE title_title_id = ?`;
+    const [akasResult] = await connection.promise().query(akasQuery, [titleObject.titleID]);
+    titleObject.titleAkas = akasResult;
+    const principalsQuery = `
+      SELECT 
+          np.principal_id AS nameID, 
+          np.principal_name AS name, 
+          tp.principal_category AS category
+      FROM title_principals tp
+      JOIN principal np ON tp.principal_principal_id = np.principal_id
+      INNER JOIN title_basics tb ON tp.title_title_id = tb.title_id
+      WHERE tb.title_id = ?`;
+  const [principalsResult] = await connection.promise().query(principalsQuery, [titleObject.titleID]);
+  titleObject.principals = principalsResult;
+  titleObjectList.push(titleObject);
+  }
+  
+  res.status(200).json({titleObjectList}); // Success: Data uploaded successfully
+  }
+  catch {
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  }
+  finally {
+    connection.end();
+  }
+
+});
 app.get(`${baseURL}/bygenre`, async (req, res) => {
   const { qgenre, minrating, yrFrom, yrTo } = req.body;
 
@@ -762,7 +819,7 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
 
 // Define an endpoint handler for /searchname
 app.get(`${baseURL}/searchname`, async (req, res) => {
-  const namePart = req.query.namePart; // Extract namePart from query parameters
+  const namePart = req.body.namePart; // Extract namePart from query parameters
 
   if (!namePart) {
     return res.status(400).json({ status: 'failed', message: 'namePart is required' });
@@ -813,6 +870,57 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
   
 });
 
+app.post(`${baseURL}/searchname`, async (req, res) => {
+  const namePart = req.body.namePart; // Extract namePart from query parameters
+
+  if (!namePart) {
+    return res.status(400).json({ status: 'failed', message: 'namePart is required' });
+  }
+
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+    const query = `SELECT 
+    np.principal_id AS nameID, 
+    np.principal_name AS name, 
+    np.principal_imageURL AS namePoster, 
+    np.principal_birthYr AS birthYr, 
+    np.principal_deathYr AS deathYr, 
+    np.principal_profession AS profession
+    FROM principal np
+    WHERE np.principal_name LIKE ?`;
+    const likenamePart = `%${namePart}%`; // SQL LIKE query format
+
+    const [nameResult] = await connection.promise().query(query, [likenamePart]);
+
+    if (!nameResult.length) {
+      return res.status(404).json({ message: 'No match found'});
+    }
+
+    var nameObjectList = [];
+    for (var i = 0; i < nameResult.length; i++) {
+      var nameObject = nameResult[i];
+      const titlesQuery = `
+          SELECT 
+              tp.title_title_id AS titleID, 
+              tp.principal_category AS category
+          FROM title_principals tp
+          WHERE tp.principal_principal_id = ?`;
+      const [titlesResult] = await connection.promise().query(titlesQuery, [nameObject.nameID]);
+      nameObject.nameTitles = titlesResult;
+      nameObjectList.push(nameObject);
+    }    
+
+    res.status(200).json({ nameObjectList });
+
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+    connection.end();
+  }
+  
+});
 
 // Define an endpoint handler for /admin/resetall
 app.post(`${baseURL}/admin/resetall`, async (req, res) => {
