@@ -13,8 +13,12 @@
 
     <style>
         
-        #searchForm {    margin-top: 100px; /* Adjust this value as needed */
-     
+        
+        #searchForm {    margin-top: 100px;
+    color: rgb(251, 251, 251);
+    display: flex; /* Add this line to enable flexbox */
+    justify-content: center; /* Add this line to center items horizontally */
+    text-align: center; 
      
     
     color: rgb(251, 251, 251); /* Add this line to set the text color to blue */
@@ -31,6 +35,8 @@ body {
     padding: 0;
     box-sizing: border-box;
     font-family: Arial, sans-serif;
+    background-color: black;
+    min-height: 100vh;
 }
 
 #results {
@@ -63,7 +69,13 @@ label, select, input, button {
 }
          
 
-         
+#searchContainer {
+    background-color: #00000000;
+    padding: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    z-index: 1000;
+    margin-left: 10px; /* Adjust this value as needed for spacing */
+}    
     </style>
 </head>
 <body>
@@ -173,34 +185,50 @@ label, select, input, button {
         }
 
         function displayResults(results) {
-            const resultsContainer = document.getElementById('results');
-            resultsContainer.innerHTML = '';
+    const resultsContainer = document.getElementById('results');
+    resultsContainer.innerHTML = '';
 
-            if (results.length === 0) {
-                resultsContainer.innerHTML = '<p>No movies found.</p>';
-                return;
-            }
+    if (results.length === 0) {
+        resultsContainer.innerHTML = '<p>No movies found.</p>';
+        return;
+    }
 
-            results.forEach(movie => {
-                const movieElement = document.createElement('div');
-                movieElement.classList.add('movie-container');
-                
-                // Check if titlePoster is '\\N\r' or undefined
-                const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r';
+    // Create a new row container
+    let currentRow = document.createElement('div');
+    currentRow.classList.add('row');
 
-                // Replace {width_variable} in the poster URL with 'w500' or use 'big_logo.png' as default
-                const posterURL = noPoster ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
+    results.forEach((movie, index) => {
+        const movieElement = document.createElement('div');
+        movieElement.classList.add('movie-container');
 
-                movieElement.innerHTML = `
-                    <a href="index_movie_details.html?titleID=${movie.titleID}">
-                        <img src="${posterURL}" alt="${movie.originalTitle} Poster">
-                        <p>${movie.originalTitle}</p>
-                    </a>
-                `;
-                resultsContainer.appendChild(movieElement);
-            });
+        // Check if titlePoster is '\\N\r' or undefined
+        const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r';
 
+        // Replace {width_variable} in the poster URL with 'w500' or use 'big_logo.png' as default
+        const posterURL = noPoster ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
+
+        movieElement.innerHTML = `
+            <a href="index_movie_details.html?titleID=${movie.titleID}">
+                <img src="${posterURL}" alt="${movie.originalTitle} Poster">
+                <p>${movie.originalTitle}</p>
+            </a>
+        `;
+
+        // Append the movie element to the current row
+        currentRow.appendChild(movieElement);
+
+        // Check if we have reached five movies or if it's the last movie
+        if ((index + 1) % 5 === 0 || index === results.length - 1) {
+            // Append the current row to the results container
+            resultsContainer.appendChild(currentRow);
+
+            // Create a new row container for the next set of movies
+            currentRow = document.createElement('div');
+            currentRow.classList.add('row');
         }
+    });
+}
+
     </script>
      
 </body>
