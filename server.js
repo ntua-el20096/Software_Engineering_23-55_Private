@@ -35,7 +35,7 @@ const databaseConfig = {
   user: 'root',
   password: '',
   database: 'ntuaflix',
-    port: 3307
+  //  port: 3307
 
 };
 //app.use(compression());
@@ -497,6 +497,74 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
   }
 });
 
+app.get(`${baseURL}/title1/:titleID`, async (req, res) => {
+  const titleID = req.params.titleID;
+  console.log('Received request for title ID:', titleID);
+  
+  // Establish a connection to the database
+  const connection = mysql.createConnection(databaseConfig);
+
+  try {
+    // Query to fetch data for the titleObject
+    const titleQuery = `
+    SELECT 
+    tb.title_id AS titleID, 
+    tb.title_type AS type, 
+    tb.title_originalTitle AS originalTitle, 
+    tb.title_posterURL AS titlePoster, 
+    tb.title_startYear AS startYear, 
+    tb.title_endYear AS endYear, 
+    tb.title_genre AS genres,
+    tb.title_runtimeMinutes AS runtimeMinutes,  
+    tr.rating_avg AS avRating,
+    tr.rating_numVotes AS nVotes
+  FROM title_basics tb
+  LEFT JOIN title_ratings tr ON tb.title_id = tr.title_title_id
+  WHERE tb.title_id = ?`;
+
+    // Execute the query
+    const [titleResult] = await connection.promise().query(titleQuery, [titleID]);
+
+    if (!titleResult.length) {
+      return res.status(404).json({ message: 'Title not found' });
+    }
+
+    const titleObject = titleResult[0];
+
+    // Fetch genres
+    // Assuming the genres are stored in a comma-separated string
+    titleObject.genres = titleObject.genres.split(',').map(genre => ({ genreTitle: genre.trim() }));
+
+    // Fetch titleAkas
+    const akasQuery = `SELECT aka_title AS akaTitle, AKA_region AS regionAbbrev FROM title_AKAs WHERE title_title_id = ?`;
+    const [akasResult] = await connection.promise().query(akasQuery, [titleID]);
+    titleObject.titleAkas = akasResult;
+
+    // Fetch principals with principal_poster
+    const principalsQuery = `
+      SELECT 
+        np.principal_id AS nameID, 
+        np.principal_name AS name, 
+        np.principal_imageURL AS principalPoster, -- Use the appropriate column
+        tp.principal_category AS category
+      FROM title_principals tp
+      JOIN principal np ON tp.principal_principal_id = np.principal_id
+      WHERE tp.title_title_id = ?`;
+
+    const [principalsResult] = await connection.promise().query(principalsQuery, [titleID]);
+    titleObject.principals = principalsResult;
+
+    // Return the titleObject
+    res.status(200).json({ titleObject });
+  } catch (error) {
+    console.error('Database error:', error);
+    res.status(500).json({ message: 'Internal server error', error: error.message });
+  } finally {
+    // Close the database connection
+    connection.end();
+  }
+});
+
 
 
 // Define an endpoint handler for /searchtitle
@@ -688,7 +756,7 @@ app.get(`${baseURL}/bygenre`, async (req, res) => {
 });
 
 
-
+ 
 
 
 
