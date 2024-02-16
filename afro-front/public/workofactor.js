@@ -58,7 +58,8 @@ function fetchTitleDetails(titleID) {
         .then(response => response.json())
         .then(data => {
             const titleDetails = data.titleObject;
-            const posterURL = titleDetails.titlePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
+            const posterURL = titleDetails.titlePoster.length <= 3  ? 'big_logo.png' : titleDetails.titlePoster.replace('{width_variable}', 'w500');
+
 
             return {
                 nameID: titleDetails.titleID,
