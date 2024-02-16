@@ -52,7 +52,7 @@ label, select, input, button {
     color: rgb(0, 0, 0);
 }
 .movie-container {
-    margin: 10px;
+    margin: 30px;
     text-align: center;
     max-width: 200px; /* Set a maximum width for the container */
 }
@@ -65,7 +65,9 @@ label, select, input, button {
 
 .movie-container p {
     margin: 0;
-    font-size: 14px; /* Set the font size for movie name */
+    font-size: 17px; /* Set the font size for movie name */
+    color: azure;
+    font-weight: bold;
 }
          
 
@@ -146,90 +148,19 @@ label, select, input, button {
         <label for="yrTo">Year To:</label>
         <input type="number" id="yrTo" name="yrTo" min="1900" max="2024">
 
+        
         <button type="button" onclick="searchMoviesgenre()">Search</button>
+        
     </form>
 
-    <div id="results"></div>
+    <div id="resultHeader" style="margin-top: 50px; margin-bottom: 20px;">
+    </div>
+    <div id="viewContainer">
+        <div id="results"></div>
+    <script src="genre.js"></script>
+    </div>
 
-    <script>
-        async function searchMoviesgenre() {
-            const qgenre = document.getElementById('qgenre').value;
-            const minrating = document.getElementById('minrating').value;
-            const yrFrom = document.getElementById('yrFrom').value;
-            const yrTo = document.getElementById('yrTo').value;
-
-            const requestData = {
-                qgenre: qgenre,
-                minrating: parseFloat(minrating),
-                yrFrom: parseInt(yrFrom),
-                yrTo: parseInt(yrTo)
-            };
-
-            const response = await fetch('https://localhost:8765/energy/api/bygenre', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(requestData)
-            });
-
-            const data = await response.json();
-
-            console.log('Received data from the server:', data);
-
-            if (data && data.titleObjectList) {
-                displayResults(data.titleObjectList);
-            } else {
-                console.error('Invalid or missing data received from the server');
-            }
-        }
-
-        function displayResults(results) {
-    const resultsContainer = document.getElementById('results');
-    resultsContainer.innerHTML = '';
-
-    if (results.length === 0) {
-        resultsContainer.innerHTML = '<p>No movies found.</p>';
-        return;
-    }
-
-    // Create a new row container
-    let currentRow = document.createElement('div');
-    currentRow.classList.add('row');
-
-    results.forEach((movie, index) => {
-        const movieElement = document.createElement('div');
-        movieElement.classList.add('movie-container');
-
-        // Check if titlePoster is '\\N\r' or undefined
-        const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r';
-
-        // Replace {width_variable} in the poster URL with 'w500' or use 'big_logo.png' as default
-        const posterURL = noPoster ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
-
-        movieElement.innerHTML = `
-            <a href="index_movie_details.html?titleID=${movie.titleID}">
-                <img src="${posterURL}" alt="${movie.originalTitle} Poster">
-                <p>${movie.originalTitle}</p>
-            </a>
-        `;
-
-        // Append the movie element to the current row
-        currentRow.appendChild(movieElement);
-
-        // Check if we have reached five movies or if it's the last movie
-        if ((index + 1) % 5 === 0 || index === results.length - 1) {
-            // Append the current row to the results container
-            resultsContainer.appendChild(currentRow);
-
-            // Create a new row container for the next set of movies
-            currentRow = document.createElement('div');
-            currentRow.classList.add('row');
-        }
-    });
-}
-
-    </script>
+    
      
 </body>
 </html>
