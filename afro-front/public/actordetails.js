@@ -41,7 +41,7 @@ document.addEventListener('DOMContentLoaded', function () {
             document.getElementById('deathYear').textContent = `Death Year: ${deathYear}`;
             const formattedProfession = actorDetails.profession.replace(/_/g, ' ');
   document.getElementById('profession').textContent = `Profession: ${formattedProfession}`;            
-  const posterUrl = actorDetails.namePoster === '\\N' ? 'big_logo.png' : actorDetails.namePoster.replace('{width_variable}', 'w500') || 'default_poster.jpg';
+  const posterUrl = actorDetails.namePoster.length <= 3  ? 'none.png' : actorDetails.namePoster.replace('{width_variable}', 'w500') || 'none.jpg';
 
             document.getElementById('posterImg').src = posterUrl;
             // Replace {width_variable} with 'w500' or your desired width
