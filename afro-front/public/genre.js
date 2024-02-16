@@ -81,7 +81,7 @@ function displayResults(results) {
         const movieElement = document.createElement('div');
         movieElement.classList.add('movie-container');
 
-        const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r';
+        const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r' || '\N\r' ;
         const posterURL = noPoster ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
 
         movieElement.innerHTML = `
@@ -90,6 +90,10 @@ function displayResults(results) {
                 <p>${movie.originalTitle}</p>
             </a>
         `;
+
+        rowContainer.appendChild(movieElement);
+    }
+}
 
         rowContainer.appendChild(movieElement);
     }
