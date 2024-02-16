@@ -41,9 +41,13 @@ document.addEventListener('DOMContentLoaded', function () {
       if (titleObject.endYear && titleObject.endYear !== '\\N') {
         document.getElementById('movieReleaseYear').textContent += ` - ${titleObject.endYear}`;
       }
-      document.getElementById('movieRating').textContent = ` ${titleObject.avRating}`;
-      document.getElementById('movieVotes').textContent = ` # of Votes: ${titleObject.nVotes}`;
-      document.getElementById('movieRuntimeMinutes').textContent = `Runtime: ${titleObject.runtimeMinutes} minutes`;
+           // Adjusted to handle null values for movie rating and number of votes
+           document.getElementById('movieRating').textContent = ` ${titleObject.avRating !== null ? titleObject.avRating : '--'}`;
+           document.getElementById('movieVotes').textContent = ` # of Votes: ${titleObject.nVotes !== null ? titleObject.nVotes : '--'}`;
+     
+           // Adjustments for runtimeMinutes to handle null, similar to your requirement
+           document.getElementById('movieRuntimeMinutes').textContent = `Runtime: ${titleObject.runtimeMinutes !== null ? titleObject.runtimeMinutes : '--'} minutes`;
+     
   
       // Display genres
       const genres = titleObject.genres.map(genre => genre.genreTitle).join(', ');
