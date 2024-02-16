@@ -1,6 +1,7 @@
 async function searchMovies() {
     const searchInput = document.getElementById('searchInput').value;
-     if (!searchInput) {
+
+    if (!searchInput) {
         alert('Please enter a movie title.');
         return;
     }
@@ -13,8 +14,8 @@ async function searchMovies() {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ titlePart: searchInput, namePart: searchInput }),
-        };        
+            body: JSON.stringify({ titlePart: cleanedSearchInput,namePart: cleanedSearchInput }  ),
+        };
 
         const [titleResponse, nameResponse] = await Promise.all([
             fetch(`/energy/api/searchtitle`, requestOptions),
