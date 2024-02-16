@@ -327,14 +327,12 @@ position: absolute;
 .slatest-movies{
     position: absolute;
     width:100%;
-    height: 100%;
+    height: 38%;
    background-color: black;
     margin-top: 500px;
     padding: 20px 20px;
-    /*  */
     overflow-x: auto; /* or overflow-x: scroll; */
     white-space: nowrap; /* Optional: Prevents content from wrapping to the next line */
-
 }
 .slatest-movies h1{
     font-size: 20px;
@@ -939,5 +937,4 @@ margin-left: 120px;
 #searchButton:hover {
     background-color: #0056b3; /* Darker shade on hover */
 }
-
 
