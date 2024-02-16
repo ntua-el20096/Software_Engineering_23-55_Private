@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+        <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -52,9 +52,10 @@
 
         .ipc-btn--single-padding {
     position: absolute; /* or 'fixed' depending on your layout */
-    left: 80%; /* Adjust this value as needed */
-    top: auto; /* Adjust or remove based on your needs */
+    left: 59%; /* Adjust this value as needed */
+    top: 65%; /* Adjust or remove based on your needs */
 }
+
 
     </style>
 </head>
@@ -124,15 +125,19 @@
                 
                 <div class="inside-heropage" style="margin-top: -100px;">
                     <h1 id="heroMovieTitle"></h1>
-                    <p id="movieCategory"></p>
-                    <p id="movieReleaseYear"></p>
-                    <p id="movieRating"></p>
-                    <p id="movieVotes"></p>
-                    <p id="movieGenres"></p>
+            <p id="movieCategory"></p>
+            <p id="movieReleaseYear"></p>
+            <p id="movieRating"></p>
+            <p id="movieVotes"></p>
+            <p id="movieGenres"></p>
+            <p id="movieRuntimeMinutes"></p>
+
+            <div id="movieTitleAkas"></div> <!-- Add this div for alternate titles -->
+            <div id="moviePrincipals"></div>
                  
                    <!---  <p id="movieTitleAkas"></p>-->
                 
-               <!-----> <div id="moviePrincipals"></div>  <!----->
+                
                 
                
                 </div>
@@ -152,8 +157,11 @@
     <div class="slatest-movies"> 
         <h1>Cast & Crew</h1>
         <div class="slatest-container" id="slatestContainer"></div>
-        <!-- <i class="fas fa-arrow-left scroll-arrow scroll-arrow-left" onclick="scrollLeft()"></i> -->
+                <!-- <i class="fas fa-arrow-left scroll-arrow scroll-arrow-left" onclick="scrollLeft()"></i> -->
         <i class="fas fa-arrow-right scroll-arrow scroll-arrow-right" onclick="scrollRight()"></i>
+        
+        <script src="movie.js"></script>  
+        <script src="castandcrew.js"></script>
     </div>
      
 
@@ -162,8 +170,8 @@
         <a href=""><i class="fas fa-arrow-up"></i></a>
     </div>
    
-    <script src="movie.js"></script>
-     
+    
     <script src="castandcrew.js"></script>
+     
 </body>
 </html>
