@@ -1,8 +1,7 @@
  //what does this code do? Connecting to the server which listens 
 //on the "https://localhost:8765/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
-//3,5,6 endpoints don't work because of the foreign keys? or not idk
-//3. title_akas, 5. title_crew, 6. title_episode
+
 
 const mysql = require('mysql2');
 const express = require('express');
@@ -11,10 +10,8 @@ const multer = require('multer');
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
-const cors = require('cors');
- 
-//const compression = require('compression'); // Import the compression middleware
- 
+const cors = require('cors'); 
+let converter = require('json-2-csv');
  
 const httpsOptions = {
   key: fs.readFileSync('server.key', 'utf8'),
@@ -38,7 +35,6 @@ const databaseConfig = {
   //  port: 3307
 
 };
-//app.use(compression());
 
 app.use(bodyParser.json());
 
@@ -59,13 +55,6 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.get('/', (req, res) => {
   // Assuming you want to serve the index.html file
   res.sendFile(path.join(__dirname, 'public', 'index_homepage.html'));
-//res.sendFile(path.join(__dirname, 'public', 'index_movie_details.html'));
-  //res.sendFile(path.join(__dirname, 'public', 'bygenre.html'));
-
- // res.sendFile(path.join(__dirname, 'public', 'index_actor_details.html'));
-
-//res.sendFile(path.join(__dirname, 'public', 'index_search.html'));
-// res.sendFile(path.join(__dirname, 'public', 'index3.html'));
 });
 // Multer configuration for handling file uploads
 const storage = multer.memoryStorage();
@@ -82,6 +71,12 @@ async function resetTable(tableName) {
 
 // Define an endpoint handler for /admin/healthcheck
 app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
   // Simulate the database connectivity check
   const connection = mysql.createConnection(databaseConfig);
 
@@ -92,14 +87,20 @@ app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
         status: 'failed',
         dataconnection: [databaseConnectionString]
       };
-      res.status(404).json(response);
+      if (format === 'json')
+        res.status(404).json(response);
+      else
+        res.status(404).send(converter.json2csv(response));
     } else {
       // Build the response JSON object for success
       const response = {
         status: 'OK',
         dataconnection: [databaseConnectionString]
       };
-      res.status(200).json(response);
+      if (format === 'json')
+        res.status(200).json(response);
+      else
+        res.status(200).send(converter.json2csv(response));
 
       // Close the database connection after the check
       connection.end();
@@ -110,12 +111,20 @@ app.get(`${baseURL}/admin/healthcheck`, (req, res) => {
 // Define an endpoint handler for /admin/upload/titlebasics
 app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.basics'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
+    if (format === 'csv')
+      return res.status(400).send(converter.json2csv(response));
     return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
@@ -135,15 +144,20 @@ app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.b
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format == 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
-
 
     // Close the database connection after the insertion
     connection.end();
@@ -154,12 +168,19 @@ app.post(`${baseURL}/admin/upload/titlebasics`, upload.single('truncated_title.b
 // Define an endpoint handler for /admin/upload/titleakas
 app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.akas'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
 
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
+    if (format === 'csv')
+      return res.status(400).send(converter.json2csv(response));
     return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
@@ -179,13 +200,19 @@ app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.aka
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -197,12 +224,21 @@ app.post(`${baseURL}/admin/upload/titleakas`, upload.single('truncated_title.aka
 // Define an endpoint handler for /admin/upload/namebasics
 app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.basics'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
+    if (format === 'csv')
+      return res.status(400).send(converter.json2csv(response));
     return res.status(400).json(response); // Bad Request: No file uploaded
   } //checks that it has a file in the body
 
@@ -241,13 +277,19 @@ app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.bas
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      if (format === 'csv')
+        res.status(200).json(response); // Success: Data uploaded and inserted into the database successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -259,13 +301,22 @@ app.post(`${baseURL}/admin/upload/namebasics`, upload.single('truncated_name.bas
 // Define an endpoint handler for /admin/upload/titlecrew
 app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.crew'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    res.status(400).json(response); // Bad Request: No file uploaded
+    if (format === 'csv')
+      res.status(400).json(response); // Bad Request: No file uploaded
+    else
+      res.status(400).send(converter.json2csv(response));
   } //checks that it has a file in the body
 
 
@@ -286,14 +337,20 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
         error: error.message
       };
       connection.query('SET FOREIGN_KEY_CHECKS=1;');
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
       connection.query('SET FOREIGN_KEY_CHECKS=1;');
-      res.status(200).json(response); // Success: Data uploaded successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -305,13 +362,23 @@ app.post(`${baseURL}/admin/upload/titlecrew`, upload.single('truncated_title.cre
 // Define an endpoint handler for /admin/upload/titleepisode
 app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.episode'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    res.status(400).json(response); // Bad Request: No file uploaded
+    if (format === 'json')
+      res.status(400).json(response); // Bad Request: No file uploaded
+    else
+      res.status(400).send(converter.json2csv(response));
   } //checks that it has a file in the body
 
 
@@ -331,14 +398,20 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
         error: error.message
       };
       connection.query('SET FOREIGN_KEY_CHECKS=1;');
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
       connection.query('SET FOREIGN_KEY_CHECKS=1;');
-      res.status(200).json(response); // Success: Data uploaded successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -350,13 +423,23 @@ app.post(`${baseURL}/admin/upload/titleepisode`, upload.single('truncated_title.
 // Define an endpoint handler for /admin/upload/titleprincipals
 app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_title.principals'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    res.status(400).json(response); // Bad Request: No file uploaded
+    if (format === 'json')
+      res.status(400).json(response); // Bad Request: No file uploaded
+    else
+      res.status(400).send(converter.json2csv(response));
   } //checks that it has a file in the body
 
 
@@ -374,13 +457,19 @@ app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_tit
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // Success: Data uploaded successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -392,13 +481,22 @@ app.post(`${baseURL}/admin/upload/titleprincipals`, upload.single('truncated_tit
 // Define an endpoint handler for /admin/upload/titleratings
 app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.ratings'), (req, res) => {
   const fileData = req.file; // Assuming the uploaded file is in req.file
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
 
   if (!fileData) {
     const response = {
       status: 'failed',
       message: 'No file uploaded'
     };
-    res.status(400).json(response); // Bad Request: No file uploaded
+    if (format === 'json')
+      res.status(400).json(response); // Bad Request: No file uploaded
+    else
+      res.status(400).send(converter.json2csv(response));
   } //checks that it has a file in the body
 
 
@@ -416,13 +514,19 @@ app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.
         message: 'Database insertion failed',
         error: error.message
       };
-      res.status(500).json(response); // Internal Server Error: Database insertion failed
+      if (format === 'json')
+        res.status(500).json(response); // Internal Server Error: Database insertion failed
+      else
+        res.status(500).send(converter.json2csv(response));
     } else {
       const response = {
         status: 'success',
         message: 'Data uploaded and inserted into the database successfully'
       };
-      res.status(200).json(response); // Success: Data uploaded successfully
+      if (format === 'json')
+        res.status(200).json(response); // Success: Data uploaded successfully
+      else
+        res.status(200).send(converter.json2csv(response));
     }
 
 
@@ -435,7 +539,12 @@ app.post(`${baseURL}/admin/upload/titleratings`, upload.single('truncated_title.
 // Define an endpoint handler for /title/:titleID
 app.get(`${baseURL}/title/:titleID`, async (req, res) => {
   const titleID = req.params.titleID;
-  console.log('Received request for title ID:', titleID);
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
 
@@ -460,7 +569,9 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
       const [titleResult] = await connection.promise().query(titleQuery, [titleID]);
 
       if (!titleResult.length) {
-          return res.status(404).json({ message: 'Title not found' });
+        if (format === 'csv')
+          return res.status(404).send(converter.json2csv({message: 'Title not found'}));
+        return res.status(404).json({ message: 'Title not found' });
       }
 
       const titleObject = titleResult[0];
@@ -487,10 +598,16 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
       titleObject.principals = principalsResult;
 
       // Return the titleObject
-      res.status(200).json({ titleObject });
+      if (format === 'json')
+        res.status(200).json({ titleObject });
+      else
+        res.status(200).send(converter.json2csv({ titleObject }));
   } catch (error) {
       console.error('Database error:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
+      if (format === 'json')
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+      else
+        res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
   } finally {
       // Close the database connection
       connection.end();
@@ -499,7 +616,12 @@ app.get(`${baseURL}/title/:titleID`, async (req, res) => {
 
 app.get(`${baseURL}/title1/:titleID`, async (req, res) => {
   const titleID = req.params.titleID;
-  console.log('Received request for title ID:', titleID);
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
   
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
@@ -526,6 +648,8 @@ app.get(`${baseURL}/title1/:titleID`, async (req, res) => {
     const [titleResult] = await connection.promise().query(titleQuery, [titleID]);
 
     if (!titleResult.length) {
+      if (format === 'csv')
+        return res.status(404).send(converter.json2csv({ message: 'Title not found' }))
       return res.status(404).json({ message: 'Title not found' });
     }
 
@@ -555,24 +679,40 @@ app.get(`${baseURL}/title1/:titleID`, async (req, res) => {
     titleObject.principals = principalsResult;
 
     // Return the titleObject
-    res.status(200).json({ titleObject });
+    if (format === 'json')
+      res.status(200).json({ titleObject });
+    else
+      res.status(200).send(converter.json2csv({ titleObject }));
   } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    if (format === 'json')
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    else
+      res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
   } finally {
     // Close the database connection
     connection.end();
   }
 });
 
-
-
+//afro
 // Define an endpoint handler for /searchtitle
 app.get(`${baseURL}/searchtitle`, async (req, res) => {
   const titlePart = req.body.titlePart; // Extract titlePart from query parameters
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   if (!titlePart) {
-    return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+    if(format === "json"){
+      return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+    }
+    else{
+      res.status(400).send(converter.json2csv({status: 'failed', message: 'titlePart is required'}));
+    }
   }
 
   // Establish a connection to the database
@@ -615,11 +755,22 @@ app.get(`${baseURL}/searchtitle`, async (req, res) => {
   titleObjectList.push(titleObject);
   }
   
-  res.status(200).json({titleObjectList}); // Success: Data uploaded successfully
+  if(format === "json"){
+    res.status(200).json({titleObjectList}); // Success: Data uploaded successfully
+  }
+  else{
+    res.status(200).send(converter.json2csv({titleObjectList }));
+  }
   }
   catch {
     console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    if(format === "json"){
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+      else{
+        res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
+      }
+   
   }
   finally {
     connection.end();
@@ -628,9 +779,21 @@ app.get(`${baseURL}/searchtitle`, async (req, res) => {
 });
 app.post(`${baseURL}/searchtitle`, async (req, res) => {
   const titlePart = req.body.titlePart; // Extract titlePart from query parameters
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   if (!titlePart) {
-    return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+    if(format === "json"){
+      return res.status(400).json({ status: 'failed', message: 'titlePart is required' });
+    }
+    else{
+      res.status(400).send( {status: 'failed', message: 'titlePart is required'});
+    }
   }
 
   // Establish a connection to the database
@@ -673,11 +836,22 @@ app.post(`${baseURL}/searchtitle`, async (req, res) => {
   titleObjectList.push(titleObject);
   }
   
-  res.status(200).json({titleObjectList}); // Success: Data uploaded successfully
+    if(format === "json"){
+      res.status(200).json({titleObjectList});
+    }
+    else{
+      res.status(200).send(converter.json2csv({titleObjectList}));
+    }
   }
+
   catch {
     console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    if(format === "json"){
+      res.status(500).json({ message: 'Internal server error', error: error.message });
+    }
+    else{
+      res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
+    }
   }
   finally {
     connection.end();
@@ -686,6 +860,13 @@ app.post(`${baseURL}/searchtitle`, async (req, res) => {
 });
 app.get(`${baseURL}/bygenre`, async (req, res) => {
   const { qgenre, minrating, yrFrom, yrTo } = req.body;
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   // Start building the query
   let query = `
@@ -744,24 +925,37 @@ app.get(`${baseURL}/bygenre`, async (req, res) => {
   titleObject.principals = principalsResult;
   titleObjectList.push(titleObject);
   }
-    // Return the results
-    res.status(200).json({titleObjectList});
+    if(format === "json"){
+      res.status(200).json({titleObjectList});
+    }
+    else{
+      res.status(200).send(converter.json2csv({titleObjectList}));
+    }
 
     // Close the database connection
     connection.end();
   } catch (error) {
       console.error('Database error:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
+      if(format === "json"){
+        res.status(500).json({ message: 'Internal server error', error: error.message });
+      }
+      else{
+        res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message}));
+      }
   }
 });
-
-
- 
 
 
 
 app.post(`${baseURL}/bygenre`, async (req, res) => {
   const { qgenre, minrating, yrFrom, yrTo } = req.body;
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
 
   // Start building the query
   let query = `
@@ -820,24 +1014,42 @@ app.post(`${baseURL}/bygenre`, async (req, res) => {
   titleObject.principals = principalsResult;
   titleObjectList.push(titleObject);
   }
-    // Return the results
-    res.status(200).json({titleObjectList});
+    if(format === "json"){
+      res.status(200).json({titleObjectList});
+    }
+    else{
+      res.status(200).send(converter.json2csv({titleObjectList}));
+    }
 
     // Close the database connection
     connection.end();
   } catch (error) {
     console.error('Database error:', error);
-    res.status(500).json({
+    if(format === "json"){
+      res.status(500).json({
         message: 'Internal server error',
         error: error.message,
         titleObjectList: []
-    });
+      });
+    }
+    else{
+      res.status(500).send(converter.json2csv({ 
+        message: 'Internal server error',
+        error: error.message,
+        titleObjectList: []
+      }));
+    }
   }
 });
+//afro
 
-// Define an endpoint handler for /name/:nameID
 app.get(`${baseURL}/name/:nameID`, async (req, res) => {
   const nameID = req.params.nameID;
+  let format = req.query.format || 'json';
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
 
   // Establish a connection to the database
   const connection = mysql.createConnection(databaseConfig);
@@ -859,7 +1071,15 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
       const [nameResult] = await connection.promise().query(nameQuery, [nameID]);
 
       if (!nameResult.length) {
+
+        if(format === "json"){
           return res.status(404).json({ message: 'Name not found' });
+           }
+          
+            else{
+              return res.status(404).send(converter.json2csv({ message: 'Name not found' })) ;
+            }
+           
       }
 
       const nameObject = nameResult[0];
@@ -875,10 +1095,23 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
       nameObject.nameTitles = titlesResult;
 
       // Return the nameObject
-      res.status(200).json({ nameObject });
+
+      if(format === "json"){
+        res.status(200).json({ nameObject });}
+        else{
+          res.status(200).send(converter.json2csv({ nameObject })) ;
+        }
+ 
   } catch (error) {
       console.error('Database error:', error);
-      res.status(500).json({ message: 'Internal server error', error: error.message });
+
+      if(format === "json"){
+        res.status(500).json({ message: 'Internal server error', error: error.message });}
+        else{
+          res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
+        }
+
+       
   } finally {
       // Close the database connection
       connection.end();
@@ -888,9 +1121,23 @@ app.get(`${baseURL}/name/:nameID`, async (req, res) => {
 // Define an endpoint handler for /searchname
 app.get(`${baseURL}/searchname`, async (req, res) => {
   const namePart = req.body.namePart; // Extract namePart from query parameters
+  let format = req.query.format || 'json';
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+   
 
   if (!namePart) {
-    return res.status(400).json({ status: 'failed', message: 'namePart is required' });
+    if(format === "json"){
+       
+      return res.status(400).json({ status: 'failed', message: 'namePart is required' });}
+      
+        else{
+          return res.status(400).send(converter.json2csv({ status: 'failed', message: 'namePart is required' })) ;
+        }
+
+     
   }
 
   const connection = mysql.createConnection(databaseConfig);
@@ -910,7 +1157,13 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
     const [nameResult] = await connection.promise().query(query, [likenamePart]);
 
     if (!nameResult.length) {
-      return res.status(404).json({ message: 'No match found'});
+      if(format === "json"){
+       
+      return res.status(404).json({ message: 'No match found'});}
+      
+        else{
+          return res.status(404).send(converter.json2csv({ message: 'No match found'})) ;
+        }
     }
 
     var nameObjectList = [];
@@ -927,11 +1180,21 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
       nameObjectList.push(nameObject);
     }    
 
-    res.status(200).json({ nameObjectList });
+    if(format === "json"){
+      res.status(200).json({ nameObjectList });}
+      else{
+        res.status(200).send(converter.json2csv({ nameObjectList })) ;
+      }
+   
 
   } catch (error) {
     console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    if(format === "json"){
+      res.status(500).json({ message: 'Internal server error', error: error.message });}
+      else{
+        res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
+      }
+    
   } finally {
     connection.end();
   }
@@ -940,9 +1203,22 @@ app.get(`${baseURL}/searchname`, async (req, res) => {
 
 app.post(`${baseURL}/searchname`, async (req, res) => {
   const namePart = req.body.namePart; // Extract namePart from query parameters
-
+  let format = req.query.format || 'json';
+  
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
   if (!namePart) {
-    return res.status(400).json({ status: 'failed', message: 'namePart is required' });
+
+    if(format === "json"){
+       
+      return res.status(400).json({ status: 'failed', message: 'namePart is required' });}
+      
+        else{
+          return res.status(400).send(converter.json2csv({ status: 'failed', message: 'namePart is required' })) ;
+        }
+     
   }
 
   const connection = mysql.createConnection(databaseConfig);
@@ -962,7 +1238,14 @@ app.post(`${baseURL}/searchname`, async (req, res) => {
     const [nameResult] = await connection.promise().query(query, [likenamePart]);
 
     if (!nameResult.length) {
-      return res.status(404).json({ message: 'No match found'});
+      if(format === "json"){
+       
+        return res.status(404).json({ message: 'No match found'});}
+        
+          else{
+            return res.status(404).send(converter.json2csv({ message: 'No match found'})) ;
+          }
+       
     }
 
     var nameObjectList = [];
@@ -978,12 +1261,21 @@ app.post(`${baseURL}/searchname`, async (req, res) => {
       nameObject.nameTitles = titlesResult;
       nameObjectList.push(nameObject);
     }    
-
-    res.status(200).json({ nameObjectList });
-
+ 
+    if(format === "json"){
+      res.status(200).json({ nameObjectList });}
+      else{
+        res.status(200).send(converter.json2csv({ nameObjectList })) ;
+      }
+   
   } catch (error) {
-    console.error('Database error:', error);
-    res.status(500).json({ message: 'Internal server error', error: error.message });
+    //console.error('Database error:', error);
+    if(format === "json"){
+      res.status(500).json({ message: 'Internal server error', error: error.message });}
+      else{
+        res.status(500).send(converter.json2csv({ message: 'Internal server error', error: error.message }));
+      }
+     
   } finally {
     connection.end();
   }
@@ -992,6 +1284,13 @@ app.post(`${baseURL}/searchname`, async (req, res) => {
 
 // Define an endpoint handler for /admin/resetall
 app.post(`${baseURL}/admin/resetall`, async (req, res) => {
+  let format = req.query.format || 'json';
+
+  if(!(format === 'json' || format === 'csv')) {
+    const message = { message: 'Invalid format parameter! format should be json or csv', error: err ? err : '' };
+    return res.status(400).send(message);
+}
+  
   try {
     // Reset data in each table
     
@@ -1008,16 +1307,23 @@ app.post(`${baseURL}/admin/resetall`, async (req, res) => {
     const response = {
       status: 'OK',
     };
-
-    res.status(200).json(response);
+    if(format === "json"){
+    res.status(200).json(response);}
+    else{
+      res.status(200).send(converter.json2csv(response));
+    }
   } catch (error) {
     // If an error occurs during the reset operation
     const response = {
       status: 'failed',
       reason: error.message, // Provide the specific reason for failure
     };
-
-    res.status(500).json(response);
+    if(format === "json"){
+      res.status(500).json(response);}
+      else{
+        res.status(500).send(converter.json2csv(response));
+      }
+    
   }
 });
 
