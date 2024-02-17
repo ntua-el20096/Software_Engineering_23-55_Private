@@ -11,7 +11,7 @@ async function searchMoviesgenre() {
         yrTo: parseInt(yrTo)
     };
 
-    const response = await fetch('https://localhost:8765/energy/api/bygenre', {
+    const response = await fetch('https://localhost:8765/ntuaflix_api/bygenre', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -94,8 +94,3 @@ function displayResults(results) {
         rowContainer.appendChild(movieElement);
     }
 }
-
-        rowContainer.appendChild(movieElement);
-    }
-}
-
