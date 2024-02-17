@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function () {
     console.log('nameID:', nameID);
 
     // Fetch actor details using an API endpoint
-    fetch(`https://localhost:8765/energy/api/name/${nameID}`)
+    fetch(`https://localhost:9876/ntuaflix_api/name/${nameID}`)
         .then(response => response.json())
         .then(data => {
             console.log('API Response:', data);
