@@ -1,4 +1,4 @@
-const baseurl = 'https://localhost:8765/energy/api';
+const baseurl = 'https://localhost:8765/ntuaflix_api/';
 
 document.addEventListener('DOMContentLoaded', function () {
     const nameID = getQueryParam('nameID');
@@ -54,7 +54,7 @@ function populateTitles(titleData) {
 }
 
 function fetchTitleDetails(titleID) {
-    return fetch(`https://localhost:8765/energy/api/title/${titleID}`)
+    return fetch(`${baseurl}/title/${titleID}`)
         .then(response => response.json())
         .then(data => {
             const titleDetails = data.titleObject;
