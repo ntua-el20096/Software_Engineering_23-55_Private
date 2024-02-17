@@ -33,7 +33,7 @@ function updateUI(actorDetailsArray) {
         // Create movie elements
         const slatestDiv = document.createElement('div');
         slatestDiv.classList.add('slatest-inside');
-        const posterUrl = actor.principalPoster.length <= 3 ? 'none.png' : getPosterUrl(actor.principalPoster, 'w500');        // Set the values in the HTML elements for each actor
+        const posterUrl = actor.principalPoster === '\\N' ? 'none.png' : getPosterUrl(actor.principalPoster, 'w500');        // Set the values in the HTML elements for each actor
         slatestDiv.innerHTML = `
             <!-- there goes the actor's photo -->
             <img class="posterImage" src="${posterUrl}"  alt=" ">
