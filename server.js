@@ -23,7 +23,7 @@ const app = express();
 app.use(express.json()); // Parse JSON requests
 
 const port = 8765;
-const baseURL = '/energy/api';
+const baseURL = '/ntuaflix_api';
 app.use(cors()); // Enable CORS for all routes
 
 // Simulated database connection string
@@ -32,7 +32,7 @@ const databaseConfig = {
   user: 'root',
   password: '',
   database: 'ntuaflix',
-  //  port: 3307
+    //port: 3307
 
 };
 
