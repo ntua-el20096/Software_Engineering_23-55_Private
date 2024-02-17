@@ -1,8 +1,3 @@
- //what does this code do? Connecting to the server which listens 
-//on the "https://localhost:9876/" and it connects to the database and 
-//executes the endpoints 1-9, populating the db
-
-
 const mysql = require('mysql2');
 const express = require('express');
 const https = require('https');
@@ -31,9 +26,7 @@ const databaseConfig = {
   host: 'localhost',
   user: 'root',
   password: '',
-  database: 'ntuaflix',
-    port: 3307
-
+  database: 'ntuaflix'
 };
 
 app.use(bodyParser.json());
