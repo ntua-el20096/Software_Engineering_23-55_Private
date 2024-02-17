@@ -1,4 +1,4 @@
-const baseurl = 'https://localhost:8765/ntuaflix_api/';
+const baseurl = 'https://localhost:8765/ntuaflix_api';
 
 document.addEventListener('DOMContentLoaded', function () {
     const nameID = getQueryParam('nameID');
