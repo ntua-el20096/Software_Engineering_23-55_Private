@@ -1,5 +1,5 @@
  //what does this code do? Connecting to the server which listens 
-//on the "https://localhost:8765/" and it connects to the database and 
+//on the "https://localhost:9876/" and it connects to the database and 
 //executes the endpoints 1-9, populating the db
 
 
@@ -22,7 +22,7 @@ const httpsOptions = {
 const app = express();
 app.use(express.json()); // Parse JSON requests
 
-const port = 8765;
+const port = 9876;
 const baseURL = '/ntuaflix_api';
 app.use(cors()); // Enable CORS for all routes
 
@@ -32,7 +32,7 @@ const databaseConfig = {
   user: 'root',
   password: '',
   database: 'ntuaflix',
-    //port: 3307
+    port: 3307
 
 };
 
