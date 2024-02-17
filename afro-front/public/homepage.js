@@ -17,8 +17,8 @@ async function searchMovies() {
         };        
 
         const [titleResponse, nameResponse] = await Promise.all([
-            fetch(`/energy/api/searchtitle`, requestOptions),
-            fetch(`/energy/api/searchname`, requestOptions),
+            fetch(`/ntuaflix_api/searchtitle`, requestOptions),
+            fetch(`/ntuaflix_api/searchname`, requestOptions),
         ]);
 
         const titleData = await titleResponse.json();
