@@ -11,7 +11,7 @@ async function searchMoviesgenre() {
         yrTo: parseInt(yrTo)
     };
 
-    const response = await fetch('https://localhost:8765/ntuaflix_api/bygenre', {
+    const response = await fetch('https://localhost:9876/ntuaflix_api/bygenre', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json'
@@ -81,8 +81,8 @@ function displayResults(results) {
         const movieElement = document.createElement('div');
         movieElement.classList.add('movie-container');
 
-        const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r' || '\N\r' ;
-        const posterURL = noPoster ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
+        //const noPoster = !movie.titlePoster || movie.titlePoster === '\\N\r' || '\N\r' ;
+        const posterURL = movie.titlePoster.length <= 3 ? 'big_logo.png' : movie.titlePoster.replace('{width_variable}', 'w500');
 
         movieElement.innerHTML = `
             <a href="index_movie_details.html?titleID=${movie.titleID}">
