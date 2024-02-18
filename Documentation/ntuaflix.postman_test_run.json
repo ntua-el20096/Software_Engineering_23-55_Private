@@ -1,0 +1,898 @@
+{
+	"id": "67ac7b22-3d14-4a1e-9abf-0fb8f542df9f",
+	"name": "home",
+	"timestamp": "2024-02-17T18:25:15.587Z",
+	"collection_id": "33031401-3699b6be-fce8-4939-8ace-68c29f1697d5",
+	"folder_id": 0,
+	"environment_id": "0",
+	"totalPass": 69,
+	"delay": 0,
+	"persist": true,
+	"status": "finished",
+	"startedAt": "2024-02-17T18:25:12.719Z",
+	"totalFail": 2,
+	"results": [
+		{
+			"id": "d0f33d62-85ba-45eb-88b0-1d92468a0f24",
+			"name": "1. healthcheck",
+			"url": "https://localhost:9876/ntuaflix_api/admin/healthcheck",
+			"time": 113,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and dataconnection": true,
+				"Status is a non-empty string": true,
+				"Dataconnection is an array": true,
+				"Response time is less than 500ms": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and dataconnection": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Dataconnection is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response time is less than 500ms": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				113
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and dataconnection": true,
+					"Status is a non-empty string": true,
+					"Dataconnection is an array": true,
+					"Response time is less than 500ms": true
+				}
+			]
+		},
+		{
+			"id": "83fd33aa-e6e7-4c2d-9810-a73c92df57b5",
+			"name": "2. title_basics",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titlebasics",
+			"time": 50,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				50
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "d9bd1ed8-c43f-439d-9fc9-8ed217b8bb0f",
+			"name": "3. title_akas",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titleakas",
+			"time": 96,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				96
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "9531562c-49a1-4054-a389-39b69f35c240",
+			"name": "4. name.basics/principals",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/namebasics",
+			"time": 108,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status field is a non-empty string": true,
+				"Message field is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status field is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message field is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				108
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status field is a non-empty string": true,
+					"Message field is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "70014601-553d-4d61-a666-de68ef291f75",
+			"name": "5. title_crew",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titlecrew",
+			"time": 24,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				24
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "a86f8850-5290-4781-aaec-0a749a97da84",
+			"name": "6. title_episode",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titleepisode",
+			"time": 20,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has required fields": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has required fields": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				20
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has required fields": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "eede6dee-fdab-4dce-86ab-9a1c3353dabf",
+			"name": "7. title_principals",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titleprincipals",
+			"time": 120,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				120
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "9ebdf103-8c12-49ec-bf2c-3b7fcb10c381",
+			"name": "8. title_ratings",
+			"url": "https://localhost:9876/ntuaflix_api/admin/upload/titleratings",
+			"time": 19,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields - status and message": true,
+				"Status is a non-empty string": true,
+				"Message is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields - status and message": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Status is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Message is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				19
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields - status and message": true,
+					"Status is a non-empty string": true,
+					"Message is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "a2b78f50-54d7-4fa0-bd3a-05d579aafa49",
+			"name": "post bygenre",
+			"url": "https://localhost:9876/ntuaflix_api/bygenre",
+			"time": 47,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Verify that the 'titleObjectList' array is present and not empty": true,
+				"Validate titleID property": true,
+				"Content-Type is application/json": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Verify that the 'titleObjectList' array is present and not empty": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Validate titleID property": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				47
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Verify that the 'titleObjectList' array is present and not empty": true,
+					"Validate titleID property": true,
+					"Content-Type is application/json": true
+				}
+			]
+		},
+		{
+			"id": "5842118e-a617-4ae6-9f05-50e7c478ea4c",
+			"name": "post searchtitle",
+			"url": "https://localhost:9876/ntuaflix_api/searchtitle",
+			"time": 17,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required field - titleObjectList": true,
+				"Each genre has the required field - genreTitle": true,
+				"Content-Type is application/json": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required field - titleObjectList": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Each genre has the required field - genreTitle": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				17
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required field - titleObjectList": true,
+					"Each genre has the required field - genreTitle": true,
+					"Content-Type is application/json": true
+				}
+			]
+		},
+		{
+			"id": "e6fdf0cc-f62b-4d2c-9cad-0c29ec05b71d",
+			"name": "post searcname",
+			"url": "https://localhost:9876/ntuaflix_api/searchname",
+			"time": 16,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required field - nameObjectList": true,
+				"Each nameObject in the response contains the nameTitles array": true,
+				"Content-Type is application/json": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required field - nameObjectList": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Each nameObject in the response contains the nameTitles array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				16
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required field - nameObjectList": true,
+					"Each nameObject in the response contains the nameTitles array": true,
+					"Content-Type is application/json": true
+				}
+			]
+		},
+		{
+			"id": "fd101059-f565-45a7-90ad-8597b35faf9b",
+			"name": "titlefull",
+			"url": "https://localhost:9876/ntuaflix_api/title1/tt0000929",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Validate the titleObject": true,
+				"Start year is a non-negative integer": true,
+				"Runtime minutes is a non-negative integer": true,
+				"Genres array is present and contains expected number of elements": false
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Validate the titleObject": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Start year is a non-negative integer": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Runtime minutes is a non-negative integer": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Genres array is present and contains expected number of elements": {
+					"pass": 0,
+					"fail": 1
+				}
+			},
+			"times": [
+				13
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Validate the titleObject": true,
+					"Start year is a non-negative integer": true,
+					"Runtime minutes is a non-negative integer": true,
+					"Genres array is present and contains expected number of elements": false
+				}
+			]
+		},
+		{
+			"id": "c0f185b8-907b-483f-9464-e7dd4bec61ee",
+			"name": "a.titleID",
+			"url": "https://localhost:9876/ntuaflix_api/title/tt0000929",
+			"time": 15,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Start Year is a non-negative integer": true,
+				"The 'genres' array is present and contains at least one element": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Start Year is a non-negative integer": {
+					"pass": 1,
+					"fail": 0
+				},
+				"The 'genres' array is present and contains at least one element": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				15
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Start Year is a non-negative integer": true,
+					"The 'genres' array is present and contains at least one element": true
+				}
+			]
+		},
+		{
+			"id": "8f8276cd-b150-4df0-8663-c03aabb18d70",
+			"name": "b. searchtitle",
+			"url": "https://localhost:9876/ntuaflix_api/searchtitle",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Content-Type is application/json": true,
+				"Verify that the 'titleObjectList' array is present and not empty": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Verify that the 'titleObjectList' array is present and not empty": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Content-Type is application/json": true,
+					"Verify that the 'titleObjectList' array is present and not empty": true
+				}
+			]
+		},
+		{
+			"id": "3b2ce08f-0acf-4bfc-b393-d041dd972a80",
+			"name": "c. bygenre",
+			"url": "https://localhost:9876/ntuaflix_api/bygenre",
+			"time": 12,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required field - titleObjectList": true,
+				"titleObjectList is an array": true,
+				"titleObjectList is empty": false,
+				"Content-Type is application/json": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required field - titleObjectList": {
+					"pass": 1,
+					"fail": 0
+				},
+				"titleObjectList is an array": {
+					"pass": 1,
+					"fail": 0
+				},
+				"titleObjectList is empty": {
+					"pass": 0,
+					"fail": 1
+				},
+				"Content-Type is application/json": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				12
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required field - titleObjectList": true,
+					"titleObjectList is an array": true,
+					"titleObjectList is empty": false,
+					"Content-Type is application/json": true
+				}
+			]
+		},
+		{
+			"id": "97f4de29-dde7-4515-8d0a-a8fb7c008793",
+			"name": "d. nameID",
+			"url": "https://localhost:9876/ntuaflix_api/name/nm0000030",
+			"time": 8,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Verify that nameID is a non-empty string": true,
+				"Verify that the nameTitles array is present and contains at least one element": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Verify that nameID is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Verify that the nameTitles array is present and contains at least one element": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				8
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Verify that nameID is a non-empty string": true,
+					"Verify that the nameTitles array is present and contains at least one element": true
+				}
+			]
+		},
+		{
+			"id": "d0b7d233-202a-4336-8cd4-e28f24f2584f",
+			"name": "e. searchname",
+			"url": "https://localhost:9876/ntuaflix_api/searchname",
+			"time": 13,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Verify that the 'nameObjectList' array is present and contains at least one element": true,
+				"Validate that nameID is a non-empty string": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Verify that the 'nameObjectList' array is present and contains at least one element": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Validate that nameID is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				13
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Verify that the 'nameObjectList' array is present and contains at least one element": true,
+					"Validate that nameID is a non-empty string": true
+				}
+			]
+		},
+		{
+			"id": "de0f155e-76d2-440d-a4d3-e672d557de0a",
+			"name": "9. resetall",
+			"url": "https://localhost:9876/ntuaflix_api/admin/resetall",
+			"time": 125,
+			"responseCode": {
+				"code": 200,
+				"name": "OK"
+			},
+			"tests": {
+				"Response status code is 200": true,
+				"Response has the required fields": true,
+				"Validate that the 'status' field is a non-empty string": true,
+				"Response time is less than 500ms": true
+			},
+			"testPassFailCounts": {
+				"Response status code is 200": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response has the required fields": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Validate that the 'status' field is a non-empty string": {
+					"pass": 1,
+					"fail": 0
+				},
+				"Response time is less than 500ms": {
+					"pass": 1,
+					"fail": 0
+				}
+			},
+			"times": [
+				125
+			],
+			"allTests": [
+				{
+					"Response status code is 200": true,
+					"Response has the required fields": true,
+					"Validate that the 'status' field is a non-empty string": true,
+					"Response time is less than 500ms": true
+				}
+			]
+		}
+	],
+	"count": 1,
+	"totalTime": 828,
+	"collection": {
+		"requests": [
+			{
+				"id": "d0f33d62-85ba-45eb-88b0-1d92468a0f24",
+				"method": "GET"
+			},
+			{
+				"id": "83fd33aa-e6e7-4c2d-9810-a73c92df57b5",
+				"method": "POST"
+			},
+			{
+				"id": "d9bd1ed8-c43f-439d-9fc9-8ed217b8bb0f",
+				"method": "POST"
+			},
+			{
+				"id": "9531562c-49a1-4054-a389-39b69f35c240",
+				"method": "POST"
+			},
+			{
+				"id": "70014601-553d-4d61-a666-de68ef291f75",
+				"method": "POST"
+			},
+			{
+				"id": "a86f8850-5290-4781-aaec-0a749a97da84",
+				"method": "POST"
+			},
+			{
+				"id": "eede6dee-fdab-4dce-86ab-9a1c3353dabf",
+				"method": "POST"
+			},
+			{
+				"id": "9ebdf103-8c12-49ec-bf2c-3b7fcb10c381",
+				"method": "POST"
+			},
+			{
+				"id": "a2b78f50-54d7-4fa0-bd3a-05d579aafa49",
+				"method": "POST"
+			},
+			{
+				"id": "5842118e-a617-4ae6-9f05-50e7c478ea4c",
+				"method": "POST"
+			},
+			{
+				"id": "e6fdf0cc-f62b-4d2c-9cad-0c29ec05b71d",
+				"method": "POST"
+			},
+			{
+				"id": "fd101059-f565-45a7-90ad-8597b35faf9b",
+				"method": "GET"
+			},
+			{
+				"id": "c0f185b8-907b-483f-9464-e7dd4bec61ee",
+				"method": "GET"
+			},
+			{
+				"id": "8f8276cd-b150-4df0-8663-c03aabb18d70",
+				"method": "GET"
+			},
+			{
+				"id": "3b2ce08f-0acf-4bfc-b393-d041dd972a80",
+				"method": "GET"
+			},
+			{
+				"id": "97f4de29-dde7-4515-8d0a-a8fb7c008793",
+				"method": "GET"
+			},
+			{
+				"id": "d0b7d233-202a-4336-8cd4-e28f24f2584f",
+				"method": "GET"
+			},
+			{
+				"id": "de0f155e-76d2-440d-a4d3-e672d557de0a",
+				"method": "POST"
+			}
+		]
+	}
+}
